@@ -4,8 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Manage Courses') }}
             </h2>
-            <a href="{{ route('admin.courses.create') }}"
-                class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
+            <a href="{{ route('admin.courses.create') }}" class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
                 Add New
             </a>
         </div>
@@ -17,8 +16,7 @@
                 @forelse ($courses as $course)
                     <div class="item-card flex flex-col md:flex-row gap-y-10 justify-between md:items-center">
                         <div class="flex flex-row items-center gap-x-3">
-                            <img src="{{ Storage::url($course->thumbnail) }}" alt=""
-                                class="rounded-2xl object-cover w-[120px] h-[90px]">
+                            <img src="{{ Storage::url($course->thumbnail) }}" alt="" class="rounded-2xl object-cover w-[120px] h-[90px]">
                             <div class="flex flex-col">
                                 <h3 class="text-indigo-950 text-xl font-bold">{{ $course->name }}</h3>
                                 <p class="text-slate-500 text-sm">{{ $course->category->name }}</p>
@@ -37,14 +35,13 @@
                             <h3 class="text-indigo-950 text-xl font-bold">{{ $course->teacher->user->name }}</h3>
                         </div>
                         <div class="hidden md:flex flex-row items-center gap-x-3">
-                            <a href="{{ route('admin.courses.show', $course) }}"
-                                class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
+                            <a href="{{ route('admin.courses.show', $course) }}" class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
                                 Manage
                             </a>
-                            <form action="{{ route('admin.courses.destroy', $course) }}" method="POST">
+                            <form action="{{ route('admin.courses.destroy', $course) }}" method="POST" class="delete-form">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="font-bold py-4 px-6 bg-red-700 text-white rounded-full">
+                                <button type="button" class="delete-button font-bold py-4 px-6 bg-red-700 text-white rounded-full">
                                     Delete
                                 </button>
                             </form>
@@ -61,4 +58,31 @@
             </div>
         </div>
     </div>
+
+    <!-- Include SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteButtons = document.querySelectorAll('.delete-button');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const form = this.closest('.delete-form');
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 </x-app-layout>

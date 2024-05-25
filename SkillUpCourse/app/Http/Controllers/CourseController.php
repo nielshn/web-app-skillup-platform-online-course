@@ -12,10 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-
 class CourseController extends Controller
 {
-
     public function index()
     {
         $user = Auth::user();
@@ -31,7 +29,6 @@ class CourseController extends Controller
 
         return view('admin.courses.index', compact('courses'));
     }
-
 
     public function create()
     {
@@ -71,7 +68,6 @@ class CourseController extends Controller
         return redirect()->route('admin.courses.index');
     }
 
-
     public function show(Course $course)
     {
         return view('admin.courses.show', compact('course'));
@@ -83,11 +79,9 @@ class CourseController extends Controller
         return view('admin.courses.edit', compact('course', 'categories'));
     }
 
-
     public function update(UpdateCourseRequest $request, Course $course)
     {
         DB::transaction(function () use ($course, $request) {
-
             $validated = $request->validated();
 
             if ($request->hasFile('thumbnail')) {
@@ -110,16 +104,17 @@ class CourseController extends Controller
         return redirect()->route('admin.courses.show', $course);
     }
 
-
     public function destroy(Course $course)
     {
-        DB::transaction();
-        try {
-            $course->delete();
-            return redirect()->route('admin.courses.index')->with('success', 'Course deleted successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->route('admin.courses.index')->with('error', 'Something went wrong');
-        }
+        DB::transaction(function() use ($course) {
+            try {
+                $course->delete();
+                return redirect()->route('admin.courses.index')->with('success', 'Course deleted successfully');
+            } catch (\Exception $e) {
+                throw $e; // This will automatically roll back the transaction
+            }
+        });
+
+        return redirect()->route('admin.courses.index')->with('error', 'Something went wrong');
     }
 }

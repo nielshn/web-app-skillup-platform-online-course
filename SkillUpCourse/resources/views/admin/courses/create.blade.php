@@ -9,6 +9,12 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden p-10 shadow-sm sm:rounded-lg">
 
+                <div class="flex justify-end mb-4">
+                    <a href="{{ route('admin.courses.index') }}" class="font-bold py-2 px-4 bg-gray-200 text-gray-800 rounded-full">
+                        Back
+                    </a>
+                </div>
+
                 @if ($errors->any())
                     @foreach ($errors->all() as $error)
                         <div class="py-3 w-full rounded-3xl bg-red-500 text-white">
@@ -28,7 +34,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <x-input-label for="thumbnail" :value="__('thumbnail')" />
+                        <x-input-label for="thumbnail" :value="__('Thumbnail')" />
                         <x-text-input id="thumbnail" class="block mt-1 w-full" type="file" name="thumbnail" required
                             autofocus autocomplete="thumbnail" />
                         <x-input-error :messages="$errors->get('thumbnail')" class="mt-2" />
@@ -42,7 +48,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <x-input-label for="category" :value="__('category')" />
+                        <x-input-label for="category" :value="__('Category')" />
 
                         <select name="category_id" id="category_id"
                             class="py-3 rounded-lg pl-3 w-full border border-slate-300">
@@ -57,7 +63,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <x-input-label for="about" :value="__('about')" />
+                        <x-input-label for="about" :value="__('About')" />
                         <textarea name="about" id="about" cols="30" rows="5" class="border border-slate-300 rounded-xl w-full"></textarea>
                         <x-input-error :messages="$errors->get('about')" class="mt-2" />
                     </div>
@@ -65,9 +71,8 @@
                     <hr class="my-5">
 
                     <div class="mt-4">
-
                         <div class="flex flex-col gap-y-5">
-                            <x-input-label for="keypoints" :value="__('keypoints')" />
+                            <x-input-label for="keypoints" :value="__('Keypoints')" />
                             @for ($i = 0; $i < 4; $i++)
                                 <input type="text" class="py-3 rounded-lg border-slate-300 border"
                                     placeholder="Write your copywriting" name="course_keypoints[]">
@@ -77,7 +82,6 @@
                     </div>
 
                     <div class="flex items-center justify-end mt-4">
-
                         <button type="submit" class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
                             Add New Course
                         </button>

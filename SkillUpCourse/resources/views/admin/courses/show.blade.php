@@ -10,6 +10,11 @@
     <div class="py-12">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-10 flex flex-col gap-y-5">
+                <div class="flex justify-end mb-4">
+                    <a href="{{ route('admin.courses.index') }}" class="font-bold py-2 px-4 bg-gray-200 text-gray-800 rounded-full">
+                        Back
+                    </a>
+                </div>
                 <div class="item-card flex flex-row gap-y-10 justify-between items-center">
                     <div class="flex flex-row items-center gap-x-3">
                         <img src="{{ Storage::url($course->thumbnail) }}" alt=""
@@ -25,14 +30,13 @@
                         <h3 class="text-indigo-950 text-xl font-bold">{{ $course->students->count() }}</h3>
                     </div>
                     <div class="flex flex-row items-center gap-x-3">
-                        <a href="{{ route('admin.courses.edit', $course) }}"
-                            class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
+                        <a href="{{ route('admin.courses.edit', $course) }}" class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
                             Edit Course
                         </a>
-                        <form action="{{ route('admin.courses.destroy', $course) }}" method="POST">
+                        <form action="{{ route('admin.courses.destroy', $course) }}" method="POST" class="delete-course-form">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="font-bold py-4 px-6 bg-red-700 text-white rounded-full">
+                            <button type="button" class="delete-course-button font-bold py-4 px-6 bg-red-700 text-white rounded-full">
                                 Delete
                             </button>
                         </form>
@@ -46,8 +50,7 @@
                         <h3 class="text-indigo-950 text-xl font-bold">Course Videos</h3>
                         <p class="text-slate-500 text-sm">{{ $course->course_videos->count() }}</p>
                     </div>
-                    <a href="{{ route('admin.course.add_video', $course->id) }}"
-                        class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
+                    <a href="{{ route('admin.course.add_video', $course->id) }}" class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
                         Add New Video
                     </a>
                 </div>
@@ -66,16 +69,14 @@
                             </div>
                         </div>
 
-
                         <div class="flex flex-row items-center gap-x-3">
-                            <a href="{{ route('admin.course_videos.edit', $video) }}"
-                                class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
+                            <a href="{{ route('admin.course_videos.edit', $video) }}" class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
                                 Edit Video
                             </a>
-                            <form action="{{ route('admin.course_videos.destroy', $video) }}" method="POST">
+                            <form action="{{ route('admin.course_videos.destroy', $video) }}" method="POST" class="delete-video-form">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="font-bold py-4 px-6 bg-red-700 text-white rounded-full">
+                                <button type="button" class="delete-video-button font-bold py-4 px-6 bg-red-700 text-white rounded-full">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path
@@ -85,11 +86,9 @@
                                             d="M19.2297 8.14C18.9897 7.89 18.6597 7.75 18.3197 7.75H5.67975C5.33975 7.75 4.99975 7.89 4.76975 8.14C4.53975 8.39 4.40975 8.73 4.42975 9.08L5.04975 19.34C5.15975 20.86 5.29975 22.76 8.78975 22.76H15.2097C18.6997 22.76 18.8397 20.87 18.9497 19.34L19.5697 9.09C19.5897 8.73 19.4597 8.39 19.2297 8.14ZM13.6597 17.75H10.3297C9.91975 17.75 9.57975 17.41 9.57975 17C9.57975 16.59 9.91975 16.25 10.3297 16.25H13.6597C14.0697 16.25 14.4097 16.59 14.4097 17C14.4097 17.41 14.0697 17.75 13.6597 17.75ZM14.4997 13.75H9.49975C9.08975 13.75 8.74975 13.41 8.74975 13C8.74975 12.59 9.08975 12.25 9.49975 12.25H14.4997C14.9097 12.25 15.2497 12.59 15.2497 13C15.2497 13.41 14.9097 13.75 14.4997 13.75Z"
                                             fill="white" />
                                     </svg>
-
                                 </button>
                             </form>
                         </div>
-
                     </div>
                 @empty
                 @endforelse
@@ -97,4 +96,53 @@
             </div>
         </div>
     </div>
+
+    <!-- Include SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteCourseButtons = document.querySelectorAll('.delete-course-button');
+            const deleteVideoButtons = document.querySelectorAll('.delete-video-button');
+
+            deleteCourseButtons.forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const form = this.closest('.delete-course-form');
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            deleteVideoButtons.forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const form = this.closest('.delete-video-form');
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 </x-app-layout>

@@ -13,14 +13,15 @@
             display: none;
         }
         .notification-messages {
-            right: 0;
-            top: 50px;
+            position: fixed;
+            right: 10px;
+            top: 110px; /* Adjusted position to be further below the icon */
             width: 300px;
             background-color: #fff;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            z-index: 1000;
+            z-index: 10000;
         }
         .notification-messages ul {
             list-style: none;
@@ -73,7 +74,7 @@
                 <a href="{{ route('front.pricing') }}" class="font-semibold">Pricing</a>
             </li>
             <li>
-                <a href="#" class="font-semibold">Benefits</a>
+                <a href="{{ route('front.checkout.details') }}" class="font-semibold">Invoice</a>
             </li>
             <li>
                 <a href="#" class="font-semibold">Stories</a>
@@ -104,7 +105,7 @@
                     @endif
                 </div>
                 <!-- Notification messages -->
-                <div class="notification-messages hidden absolute">
+                <div class="notification-messages hidden">
                     <ul>
                         @if(isset($notifications) && $notifications->count() > 0)
                             @foreach($notifications as $notification)

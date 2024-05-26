@@ -31,6 +31,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/store', [FrontController::class, 'checkout_store'])->name('front.checkout.store')
         ->middleware('role:student');
 
+    Route::get('/checkout/details', [FrontController::class, 'checkoutDetails'])->name('front.checkout.details');
+    Route::get('/checkout-view-details', [FrontController::class, 'checkoutViewDetails'])->name('front.checkout_view_details');
+
     Route::get('/learning/{course}/{courseVideoId}', [FrontController::class, 'learning'])
         ->name('front.learning')
         ->middleware('role:student|teacher|owner');

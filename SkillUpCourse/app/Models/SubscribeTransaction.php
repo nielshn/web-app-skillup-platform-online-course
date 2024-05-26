@@ -16,6 +16,7 @@ class SubscribeTransaction extends Model
         'user_id',
         'proof',
         'subscription_start_date',
+        'subscription_end_date',
     ];
 
     protected $casts = [

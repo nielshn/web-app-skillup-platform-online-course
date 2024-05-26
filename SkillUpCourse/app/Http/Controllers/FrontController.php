@@ -6,41 +6,45 @@ use App\Http\Requests\StoreSubscribeTransactionRequest;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\SubscribeTransaction;
-use App\Models\Notification; // tambahkan ini
+use App\Models\Notification; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class FrontController extends Controller
 {
-    public function index()
+    private function getUserNotifications()
     {
-        $categories = Category::paginate(8);
-        $courses = Course::with(['category', 'teacher', 'students'])->orderByDesc('id')->get();
         $notifications = Notification::where('user_id', auth()->id())
             ->orderByDesc('created_at')
             ->get();
         $unreadNotifications = $notifications->where('status', 'unread');
-        return view('front.index', compact('courses', 'categories', 'notifications', 'unreadNotifications'));
+        
+        return compact('notifications', 'unreadNotifications');
+    }
+
+    public function index()
+    {
+        $categories = Category::paginate(8);
+        $courses = Course::with(['category', 'teacher', 'students'])->orderByDesc('id')->get();
+        $notificationsData = $this->getUserNotifications();
+        
+        return view('front.index', compact('courses', 'categories') + $notificationsData);
     }
 
     public function details(Course $course)
     {
-        $notifications = Notification::where('user_id', auth()->id())
-            ->where('status', 'unread')
-            ->orderByDesc('created_at')
-            ->get();
-        return view('front.details', compact('course', 'notifications'));
+        $notificationsData = $this->getUserNotifications();
+        
+        return view('front.details', compact('course') + $notificationsData);
     }
 
     public function category(Category $category)
     {
         $courses = $category->courses()->get();
-        $notifications = Notification::where('user_id', auth()->id())
-            ->where('status', 'unread')
-            ->orderByDesc('created_at')
-            ->get();
-        return view('front.category', compact('category', 'courses', 'notifications'));
+        $notificationsData = $this->getUserNotifications();
+        
+        return view('front.category', compact('category', 'courses') + $notificationsData);
     }
 
     public function pricing()
@@ -49,11 +53,9 @@ class FrontController extends Controller
         if ($user->hasActiveSubscription()) {
             return redirect()->route('front.index');
         }
-        $notifications = Notification::where('user_id', auth()->id())
-            ->where('status', 'unread')
-            ->orderByDesc('created_at')
-            ->get();
-        return view('front.pricing', compact('notifications'));
+        $notificationsData = $this->getUserNotifications();
+        
+        return view('front.pricing', $notificationsData);
     }
 
     public function checkout()
@@ -62,11 +64,9 @@ class FrontController extends Controller
         if ($user->hasActiveSubscription()) {
             return redirect()->route('front.index');
         }
-        $notifications = Notification::where('user_id', auth()->id())
-            ->where('status', 'unread')
-            ->orderByDesc('created_at')
-            ->get();
-        return view('front.checkout', compact('notifications'));
+        $notificationsData = $this->getUserNotifications();
+        
+        return view('front.checkout', $notificationsData);
     }
 
     public function checkout_store(StoreSubscribeTransactionRequest $request, NotificationController $notificationController)
@@ -108,11 +108,24 @@ class FrontController extends Controller
 
         $user->courses()->syncWithoutDetaching($course->id);
 
-        $notifications = Notification::where('user_id', auth()->id())
-            ->where('status', 'unread')
-            ->orderByDesc('created_at')
-            ->get();
+        $notificationsData = $this->getUserNotifications();
 
-        return view('front.learning', compact('course', 'video', 'notifications'));
+        return view('front.learning', compact('course', 'video') + $notificationsData);
+    }
+
+    public function checkoutDetails()
+    {
+        $transactions = SubscribeTransaction::where('user_id', Auth::id())->get();
+        $notificationsData = $this->getUserNotifications();
+
+        return view('front.checkout_details', compact('transactions') + $notificationsData);
+    }
+
+    public function checkoutViewDetails()
+    {
+        $transactions = SubscribeTransaction::where('user_id', Auth::id())->latest()->first();
+        $notificationsData = $this->getUserNotifications();
+        
+        return view('front.checkout_view_details', compact('transactions') + $notificationsData);
     }
 }

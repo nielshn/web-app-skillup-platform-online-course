@@ -4,6 +4,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseVideoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FAQController;
 use App\Http\Controllers\FrontController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscribeTransactionController;
@@ -39,6 +40,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', CategoryController::class)
             ->middleware('role:owner');
 
+        Route::resource('faqs', FAQController::class)
+        ->middleware('role:owner');
+        
         Route::resource('teachers', TeacherController::class)
             ->middleware('role:owner');
 

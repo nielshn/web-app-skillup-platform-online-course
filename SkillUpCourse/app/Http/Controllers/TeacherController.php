@@ -7,6 +7,7 @@ use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
 class TeacherController extends Controller
@@ -16,9 +17,14 @@ class TeacherController extends Controller
      */
     public function index()
     {
+        $successMessage = Session::get('success');
+        $errorMessage = Session::get('error');
+
         $teachers = Teacher::orderBy('id', 'desc')->get();
         return view('admin.teachers.index', [
             'teachers' => $teachers,
+            'successMessage' => $successMessage,
+            'errorMessage' => $errorMessage,
         ]);
     }
 
@@ -60,6 +66,8 @@ class TeacherController extends Controller
             }
             $user->assignRole('teacher');
         });
+
+        Session::flash('success', 'Teacher has been created successfully');
         return redirect()->route('admin.teachers.index');
     }
 
@@ -99,13 +107,12 @@ class TeacherController extends Controller
             $user->removeRole('teacher');
             $user->assignRole('student');
 
+            Session::flash('success', 'Teacher has been deleted successfully');
             return redirect()->back();
         } catch (\Exception $e) {
             DB::rollBack();
-            $error = ValidationException::withMessages([
-                'system_error' => ['System error!' . $e->getMessage()],
-            ]);
-            throw $error;
+            Session::flash('error', 'System error! ' . $e->getMessage());
+            return redirect()->back();
         }
     }
 }

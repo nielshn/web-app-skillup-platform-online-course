@@ -25,6 +25,7 @@ class SubscribeTransactionController extends Controller
 
     public function store(Request $request)
     {
+        
     }
 
 

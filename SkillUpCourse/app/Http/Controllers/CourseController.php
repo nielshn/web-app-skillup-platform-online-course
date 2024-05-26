@@ -10,6 +10,7 @@ use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 
@@ -18,6 +19,9 @@ class CourseController extends Controller
 
     public function index()
     {
+        $successMessage = Session::get('success');
+        $errorMessage = Session::get('error');
+
         $user = Auth::user();
         $query = Course::with(['category', 'teacher', 'students'])->orderByDesc('id');
 
@@ -29,7 +33,7 @@ class CourseController extends Controller
 
         $courses = $query->paginate(3);
 
-        return view('admin.courses.index', compact('courses'));
+        return view('admin.courses.index', compact('courses', 'successMessage', 'errorMessage'));
     }
 
 
@@ -45,7 +49,7 @@ class CourseController extends Controller
         $teacher = Teacher::where(['user_id' => Auth::user()->id])->first();
 
         if (!$teacher) {
-            return redirect()->route('admin.courses.index')->withErrors('Unauthorized or invalid teacher');
+            return redirect()->route('admin.courses.index');
         }
 
         DB::transaction(function () use ($teacher, $request) {
@@ -68,6 +72,8 @@ class CourseController extends Controller
                 }
             }
         });
+
+        Session::flash('success', 'Course has been created successfully');
         return redirect()->route('admin.courses.index');
     }
 
@@ -86,6 +92,12 @@ class CourseController extends Controller
 
     public function update(UpdateCourseRequest $request, Course $course)
     {
+        $teacher = Teacher::where(['user_id' => Auth::user()->id])->first();
+
+        if (!$teacher) {
+            return redirect()->route('admin.courses.index')->withErrors('Unauthorized or invalid teacher');
+        }
+
         DB::transaction(function () use ($course, $request) {
 
             $validated = $request->validated();
@@ -107,6 +119,7 @@ class CourseController extends Controller
                 }
             }
         });
+        Session::flash('success', 'Course has been updated successfully');
         return redirect()->route('admin.courses.show', $course);
     }
 
@@ -116,10 +129,12 @@ class CourseController extends Controller
         DB::transaction();
         try {
             $course->delete();
-            return redirect()->route('admin.courses.index')->with('success', 'Course deleted successfully');
+            Session::flash('success', 'Course has been deleted successfully');
+            return redirect()->route('admin.courses.index');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('admin.courses.index')->with('error', 'Something went wrong');
+            Session::flash('error', 'System error! ' . $e->getMessage());
+            return redirect()->route('admin.courses.index');
         }
     }
 }

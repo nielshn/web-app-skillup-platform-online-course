@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
@@ -14,8 +15,14 @@ class CategoryController extends Controller
 
     public function index()
     {
+        $successMessage = Session::get('success');
+        $errorMessage = Session::get('error');
         $categories = Category::orderByDesc('id')->get();
-        return view('admin.categories.index', compact('categories'));
+        return view('admin.categories.index', compact(
+            'categories',
+            'successMessage',
+            'errorMessage'
+        ));
     }
 
 
@@ -42,7 +49,7 @@ class CategoryController extends Controller
 
             $category = Category::create($validated);
         });
-
+        Session::flash('success', 'Category has been created successfully');
         return redirect()->route('admin.categories.index');
     }
 
@@ -76,7 +83,7 @@ class CategoryController extends Controller
 
             $category->update($validated);
         });
-
+        Session::flash('success', 'Category has been updated successfully');
         return redirect()->route('admin.categories.index');
     }
 
@@ -89,10 +96,12 @@ class CategoryController extends Controller
         try {
             $category->delete();
             DB::commit();
+            Session::flash('success', 'Category has been deleted successfully');
             return redirect()->route('admin.categories.index');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('admin.categories.index')->with('error', $e->getMessage());
+            Session::flash('error', 'System error! ' . $e->getMessage());
+            return redirect()->route('admin.categories.index');
         }
     }
 }

@@ -7,12 +7,16 @@ use App\Models\Course;
 use App\Models\CourseVideo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class CourseVideoController extends Controller
 {
 
     public function index()
     {
+        $successMessage = Session::get('success');
+        $errorMessage = Session::get('error');
+        return view('admin.courses.show', compact('successMessage', 'errorMessage'));
     }
 
 
@@ -50,6 +54,7 @@ class CourseVideoController extends Controller
             $courseVideo->update($validated);
         });
 
+        Session::flash('success', 'Course Video has been updated successfully');
         return redirect()->route('admin.courses.show', $courseVideo->course_id);
     }
 
@@ -59,13 +64,12 @@ class CourseVideoController extends Controller
         try {
             $courseVideo->delete();
             DB::commit();
+            Session::flash('success', 'Course Video has been updated successfully');
             return redirect()->route('admin.courses.show', $courseVideo->course_id);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('admin.courses.show', $courseVideo->course_id)->with(
-                'error',
-                'Something went wrong, please try again!'
-            );
+            Session::flash('error', $e->getMessage());
+            return redirect()->route('admin.courses.show', $courseVideo->course_id);
         }
     }
 }

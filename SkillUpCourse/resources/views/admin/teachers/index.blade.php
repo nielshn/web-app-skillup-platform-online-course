@@ -53,11 +53,12 @@
                                 {{ $teacher->user->created_at->format('d M, Y') }}</h3>
                         </div>
                         <div class="hidden md:flex flex-row items-center gap-x-3">
-                            <form action="{{ route('admin.teachers.destroy', $teacher) }}" method="POST">
+                            <form action="{{ route('admin.teachers.destroy', $teacher) }}" method="POST"
+                                class="delete-teacher-form">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit"
-                                    class="font-bold py-2 px-4 bg-red-600 hover:bg-red-500 text-white rounded-full transition-all duration-300">
+                                <button type="button"
+                                    class="delete-teacher-button font-bold py-2 px-4 bg-red-600 hover:bg-red-500 text-white rounded-full transition-all duration-300">
                                     Delete
                                 </button>
                             </form>
@@ -70,8 +71,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Function to hide success message after 5 seconds
         setTimeout(function() {
             var successMessage = document.getElementById('success-message');
             if (successMessage) {
@@ -93,5 +94,28 @@
                 message.remove();
             }
         }
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteTeacherButtons = document.querySelectorAll('.delete-teacher-button');
+
+            deleteTeacherButtons.forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const form = this.closest('.delete-teacher-form');
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
     </script>
 </x-app-layout>

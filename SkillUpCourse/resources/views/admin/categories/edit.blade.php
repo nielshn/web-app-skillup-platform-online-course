@@ -9,6 +9,12 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden p-10 shadow-sm sm:rounded-lg">
 
+                <div class="flex justify-end mb-4">
+                    <a href="{{ route('admin.categories.index') }}" class="font-bold py-2 px-4 bg-gray-200 text-gray-800 rounded-full">
+                        Back
+                    </a>
+                </div>
+
                 @if ($errors->any())
                     @foreach ($errors->all() as $error)
                         <div class="py-3 w-full rounded-3xl bg-red-500 text-white">

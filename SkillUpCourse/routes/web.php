@@ -6,6 +6,7 @@ use App\Http\Controllers\CourseVideoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\FrontController;
+use App\Http\Controllers\NotificationController; // tambahkan ini
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscribeTransactionController;
 use App\Http\Controllers\TeacherController;
@@ -16,7 +17,7 @@ Route::get('/details/{course:slug}', [FrontController::class, 'details'])->name(
 Route::get('/category/{category:slug}', [FrontController::class, 'category'])->name('front.category');
 Route::get('/pricing', [FrontController::class, 'pricing'])->name('front.pricing');
 
-
+Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -31,10 +32,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/store', [FrontController::class, 'checkout_store'])->name('front.checkout.store')
         ->middleware('role:student');
 
+    Route::get('/checkout/details', [FrontController::class, 'checkoutDetails'])->name('front.checkout.details');
+    Route::get('/checkout-view-details', [FrontController::class, 'checkoutViewDetails'])->name('front.checkout_view_details');
+
     Route::get('/learning/{course}/{courseVideoId}', [FrontController::class, 'learning'])
         ->name('front.learning')
         ->middleware('role:student|teacher|owner');
-
 
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('categories', CategoryController::class)

@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', function () {
             const targetId = this.dataset.accordion;
             const targetAccordion = document.getElementById(targetId);
+            const arrowIcon = this.querySelector('.arrow svg');
 
             btn.classList.toggle('open');
             targetAccordion.classList.toggle('hide');
@@ -15,9 +16,24 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 targetAccordion.style.maxHeight = targetAccordion.scrollHeight + "px";
             }
+
+            // Toggle rotation on the arrow icon
+            arrowIcon.classList.toggle('rotate-180');
         });
     });
 });
+
+function updateFileName(input) {
+    console.log("updateFileName function triggered");
+    if (input.files && input.files.length > 0) {
+        // Get the file name
+        var fileName = input.files[0].name;
+        console.log(fileName);
+
+        // Update the text of the <p> element inside the button
+        document.getElementById('fileLabel').innerText = fileName;
+    }
+}
 
 // nav & tabs funtion like bootstrap
 document.addEventListener("DOMContentLoaded", function () {
@@ -90,3 +106,6 @@ function updateFileName(input) {
         document.getElementById('fileLabel').innerText = fileName;
     }
 }
+
+
+

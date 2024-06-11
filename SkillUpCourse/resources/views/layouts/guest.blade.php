@@ -1,30 +1,43 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link href="{{ asset('css/linearicons.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/owl.carousel.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/themify-icons.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/nice-select.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/nouislider.min.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/main.css') }}" rel="stylesheet" />
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
-            </div>
-        </div>
-    </body>
+<body class="font-sans text-gray-900 antialiased">
+    {{ $slot }}
+</body>
+<script src="{{ asset('js/jquery-2.2.4.min.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"
+    integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous">
+</script>
+<script src="{{ asset('js/bootstrap.min.js') }}"></script>
+<script src="{{ asset('js/jquery.ajaxchimp.min.js') }}"></script>
+<script src="{{ asset('js/jquery.nice-select.min.js') }}"></script>
+<script src="{{ asset('js/jquery.sticky.js') }}"></script>
+<script src="{{ asset('js/nouislider.min.js') }}"></script>
+<script src="{{ asset('js/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ asset('js/owl.carousel.min.js') }}"></script>
+<!--gmaps Js-->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
+<script src="{{ asset('js/gmaps.min.js') }}"></script>
+<script src="{{ asset('js/main2.js') }}"></script>
+
 </html>

@@ -27,43 +27,38 @@ class User extends Authenticatable
         'avatar',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'created_at' => 'datetime:Y-m-d H:m:s',
+            'updated_at' => 'datetime:Y-m-d H:m:s',
+            'deleted_at' => 'datetime:Y-m-d H:m:s',
         ];
     }
-
-    protected $casts = [
-        'created_at' => 'datetime:Y-m-d H:m:s',
-        'updated_at' => 'datetime:Y-m-d H:m:s',
-        'deleted_at' => 'datetime:Y-m-d H:m:s',
-    ];
 
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'course_students');
     }
 
+
     public function subscribe_transactions()
     {
-        return $this->hasMany(SubscribeTransaction::class,);
+        return $this->hasMany(SubscribeTransaction::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'user_id');
     }
 
     public function hasActiveSubscription()
@@ -77,7 +72,7 @@ class User extends Authenticatable
             return false;
         }
 
-        $subscriptionEndDate = Carbon::parse($latestSubscription->subscribe_start_date)->addMonths(1);
+        $subscriptionEndDate = Carbon::parse($latestSubscription->subscription_end_date);
         return Carbon::now()->lessThanOrEqualTo($subscriptionEndDate);
     }
 }

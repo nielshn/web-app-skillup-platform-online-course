@@ -20,6 +20,9 @@
                         <x-nav-link :href="route('admin.courses.index')" :active="request()->routeIs('admin.courses.index')">
                             {{ __('Manage Courses') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.reviews.index')" :active="request()->routeIs('admin.reviews.index')">
+                            {{ __('Manage Reviews') }}
+                        </x-nav-link>
                     @endrole
 
                     @role('owner')
@@ -31,7 +34,10 @@
                             {{ __('Manage Teachers') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.subscribe_transactions.index')" :active="request()->routeIs('admin.subscribe_transactions.index')">
-                            {{ __('Manage Subscribtion') }}
+                            {{ __('Manage Subscribtions') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.faqs.index')" :active="request()->routeIs('admin.faqs.index')">
+                            {{ __('Manage FAQs') }}
                         </x-nav-link>
                     @endrole
                 </div>

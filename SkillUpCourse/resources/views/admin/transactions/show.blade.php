@@ -6,10 +6,20 @@
             </h2>
         </div>
     </x-slot>
-
+    @include('layouts.backend.session-message')
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-10 flex flex-col gap-y-5">
+            <div class="bg-white overflow-hidden p-8 sm:rounded-lg shadow-md">
+                <div class="flex justify-end mb-4">
+                    <a href="{{ route('admin.subscribe_transactions.index') }}"
+                        class="font-bold py-2 px-4 bg-gray-200 text-gray-800 rounded-full flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span>Back</span>
+                    </a>
+                </div>
                 <div class="flex flex-row gap-x-10">
                     <svg width="100" height="100" viewBox="0 0 24 24" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
@@ -49,6 +59,11 @@
                             <h3 class="text-indigo-950 text-xl font-bold">
                                 {{ $subscribeTransaction->subscription_start_date }}</h3>
                         </div>
+                        <div>
+                            <p class="text-slate-500 text-sm">Subscription End At</p>
+                            <h3 class="text-indigo-950 text-xl font-bold">
+                                {{ $subscribeTransaction->subscription_end_date }}</h3>
+                        </div>
                         <div class="">
                             <p class="text-slate-500 text-sm">Student</p>
                             <h3 class="text-indigo-950 text-xl font-bold">{{ $subscribeTransaction->user->name }}</h3>
@@ -59,13 +74,16 @@
                     </div>
                 </div>
                 <hr class="my-5">
-                <form action="{{ route('admin.subscribe_transactions.update', $subscribeTransaction) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <button type="submit" class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
-                        Approve Transaction
-                    </button>
-                </form>
+                @if (!$subscribeTransaction->is_paid)
+                    <form action="{{ route('admin.subscribe_transactions.update', $subscribeTransaction) }}"
+                        method="POST">
+                        @csrf
+                        @method('PUT')
+                        <button type="submit" class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
+                            Approve Transaction
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>

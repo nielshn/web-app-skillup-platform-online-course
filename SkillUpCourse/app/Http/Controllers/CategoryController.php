@@ -8,20 +8,33 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
         $successMessage = Session::get('success');
         $errorMessage = Session::get('error');
-        $categories = Category::orderByDesc('id')->get();
+
+        $search = $request->input('search');
+        $query = Category::orderByDesc('id');
+
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('slug', 'like', '%' . $search . '%');
+            });
+        }
+        $categories = $query->paginate(4);
         return view('admin.categories.index', compact(
             'categories',
             'successMessage',
-            'errorMessage'
+            'errorMessage',
+            'search'
         ));
     }
 
@@ -94,6 +107,9 @@ class CategoryController extends Controller
     {
         DB::beginTransaction();
         try {
+            if ($category->icon) {
+                Storage::disk('public')->delete($category->icon);
+            }
             $category->delete();
             DB::commit();
             Session::flash('success', 'Category has been deleted successfully');

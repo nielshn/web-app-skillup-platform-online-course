@@ -8,23 +8,34 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class TeacherController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function index(Request $request)
     {
         $successMessage = Session::get('success');
         $errorMessage = Session::get('error');
 
-        $teachers = Teacher::orderBy('id', 'desc')->get();
+        $search = $request->input('search');
+        $query = Teacher::with('user')->orderBy('id', 'desc');
+
+        if ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        $teachers = $query->paginate(2);
+
         return view('admin.teachers.index', [
             'teachers' => $teachers,
             'successMessage' => $successMessage,
             'errorMessage' => $errorMessage,
+            'search' => $search
         ]);
     }
 
@@ -101,18 +112,28 @@ class TeacherController extends Controller
     public function destroy(Teacher $teacher)
     {
         try {
-            $teacher->delete();
+            DB::transaction(function () use ($teacher) {
+                $courses = $teacher->courses;
+                foreach ($courses as $course) {
+                    if ($course->thumbnail) {
+                        Storage::disk('public')->delete($course->thumbnail);
+                    }
+                    $course->delete();
+                }
 
-            $user = User::find($teacher->user_id);
-            $user->removeRole('teacher');
-            $user->assignRole('student');
+                $teacher->delete();
 
-            Session::flash('success', 'Teacher has been deleted successfully');
-            return redirect()->back();
+                $user = User::find($teacher->user_id);
+                $user->removeRole('teacher');
+                $user->assignRole('student');
+            });
+
+            Session::flash('success', 'Teacher and related courses have been deleted successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             Session::flash('error', 'System error! ' . $e->getMessage());
-            return redirect()->back();
         }
+
+        return redirect()->back();
     }
 }

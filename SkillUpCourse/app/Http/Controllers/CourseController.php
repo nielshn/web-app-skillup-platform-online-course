@@ -12,14 +12,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class CourseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $successMessage = Session::get('success');
         $errorMessage = Session::get('error');
 
+        $search = $request->input('search');
         $user = Auth::user();
         $query = Course::with(['category', 'teacher', 'students'])->orderByDesc('id');
 
@@ -29,10 +31,21 @@ class CourseController extends Controller
             });
         }
 
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
         $courses = $query->paginate(3);
 
-        return view('admin.courses.index', compact('courses', 'successMessage', 'errorMessage'));
+        return view('admin.courses.index', compact('courses', 'successMessage', 'errorMessage', 'search'));
     }
+
+
 
     public function create()
     {
@@ -42,10 +55,10 @@ class CourseController extends Controller
 
     public function store(StoreCourseRequest $request)
     {
-        // check if user has role teacher
         $teacher = Teacher::where(['user_id' => Auth::user()->id])->first();
 
         if (!$teacher) {
+            Session::flash('error', 'Only Teachers can manage Course.');
             return redirect()->route('admin.courses.index');
         }
 
@@ -60,7 +73,6 @@ class CourseController extends Controller
             $validated['teacher_id']  = $teacher->id;
 
             $course = Course::create($validated);
-
             if (!empty($validated['course_keypoints'])) {
                 foreach ($validated['course_keypoints'] as $keypointText) {
                     $course->course_keypoints()->create([
@@ -90,7 +102,8 @@ class CourseController extends Controller
         $teacher = Teacher::where(['user_id' => Auth::user()->id])->first();
 
         if (!$teacher) {
-            return redirect()->route('admin.courses.index')->withErrors('Unauthorized or invalid teacher');
+            Session::flash('error', 'Only Teachers can manage Course');
+            return redirect()->route('admin.courses.index');
         }
 
         DB::transaction(function () use ($course, $request) {
@@ -100,6 +113,7 @@ class CourseController extends Controller
                 $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
                 $validated['thumbnail'] = $thumbnailPath;
             }
+
             $validated['slug'] = Str::slug($validated['name']);
 
             $course->update($validated);
@@ -113,22 +127,29 @@ class CourseController extends Controller
                 }
             }
         });
+
         Session::flash('success', 'Course has been updated successfully');
         return redirect()->route('admin.courses.show', $course);
     }
 
     public function destroy(Course $course)
     {
+        DB::beginTransaction();
 
-        DB::transaction(function () use ($course) {
-            try {
-                $course->delete();
-                return redirect()->route('admin.courses.index')->with('success', 'Course deleted successfully');
-            } catch (\Exception $e) {
-                throw $e;
+        try {
+            if ($course->thumbnail) {
+                Storage::disk('public')->delete($course->thumbnail);
             }
-        });
 
-        return redirect()->route('admin.courses.index')->with('error', 'Something went wrong');
+            $course->delete();
+
+            DB::commit();
+            Session::flash('success', 'Course has been deleted successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Session::flash('error', 'System error! ' . $e->getMessage());
+        }
+
+        return redirect()->route('admin.courses.index');
     }
 }

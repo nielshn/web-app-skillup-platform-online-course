@@ -5,73 +5,256 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSubscribeTransactionRequest;
 use App\Models\Category;
 use App\Models\Course;
+use App\Models\CourseImage;
+use App\Models\CourseStudent;
 use App\Models\SubscribeTransaction;
-use App\Models\Notification; 
+use App\Models\Notification;
+use App\Models\CourseVideo;
+use App\Models\FAQ;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Contracts\Session\Session;
 
 class FrontController extends Controller
 {
+
+    private function getFaqsAndReviews()
+    {
+        $faqs = FAQ::orderByDesc('id')->take(4)->get();
+        $allFaqs = FAQ::orderByDesc('id')->get();
+        $reviews = Review::select('id', 'user_id', 'course_id', 'rating', 'note', 'created_at')
+            ->distinct('user_id')
+            ->with('user')
+            ->orderByDesc('created_at')
+            ->get();
+        return compact('faqs', 'allFaqs', 'reviews');
+    }
+
     private function getUserNotifications()
     {
         $notifications = Notification::where('user_id', auth()->id())
             ->orderByDesc('created_at')
             ->get();
         $unreadNotifications = $notifications->where('status', 'unread');
-        
+
         return compact('notifications', 'unreadNotifications');
+    }
+
+    private function getAllCourses()
+    {
+        $courses = Course::with(['category', 'teacher', 'students'])
+            ->withCount(['students'])
+            ->get()
+            ->sortByDesc(function ($course) {
+                return $course->averageRating();
+            });
+        return $courses;
     }
 
     public function index()
     {
-        $categories = Category::paginate(8);
-        $courses = Course::with(['category', 'teacher', 'students'])->orderByDesc('id')->get();
+        $courses = $this->getAllCourses();
+        $categories = Category::orderByDesc('id')->get();
+        $faqsAndReviews = $this->getFaqsAndReviews();
         $notificationsData = $this->getUserNotifications();
-        
-        return view('front.index', compact('courses', 'categories') + $notificationsData);
+
+        return view('front.index', compact('courses', 'categories') + $faqsAndReviews + $notificationsData);
+    }
+
+    public function allCourses(Request $request)
+    {
+        $search = $request->input('search');
+        $categoryId = $request->input('category');
+
+        $courses = $this->getAllCourses();
+
+        if ($search) {
+            $courses = $courses->filter(function ($course) use ($search) {
+                return stripos($course->name, $search) !== false;
+            });
+        }
+
+        if ($categoryId) {
+            $courses = $courses->filter(function ($course) use ($categoryId) {
+                return $course->category_id == $categoryId;
+            });
+        }
+
+        $categories = Category::orderByDesc('id')->get();
+        $faqsAndReviews = $this->getFaqsAndReviews();
+        $notificationsData = $this->getUserNotifications();
+
+        return view('front.all_courses', compact('courses', 'categories') + $faqsAndReviews + $notificationsData);
+    }
+
+    public function loadMoreFaqs(Request $request)
+    {
+        $skip = $request->query('skip', 0);
+        $faqs = FAQ::orderByDesc('id')
+            ->skip($skip)
+            ->take(4)
+            ->get();
+        return response()->json($faqs);
+    }
+
+    public function myCourses(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'You are not logged in yet');
+        }
+
+        $search = $request->input('search');
+        $categoryId = $request->input('category');
+
+        $query = Course::query()
+            ->whereHas('students', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->with('category');
+
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        $initialCourses = $query->orderByDesc('id')->take(4)->get()->sortByDesc(function ($course) {
+            return $course->averageRating();
+        });
+
+        $allCourses = $query->orderByDesc('id')->get()->sortByDesc(function ($course) {
+            return $course->averageRating();
+        });
+
+        $categories = Category::orderByDesc('id')->get();
+        $faqsAndReviews = $this->getFaqsAndReviews();
+        $notificationsData = $this->getUserNotifications();
+
+        return view('front.my_courses', compact('initialCourses', 'categories', 'allCourses') + $faqsAndReviews + $notificationsData);
+    }
+
+    public function loadMoreMyCourses(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([], 401); // Unauthorized
+        }
+
+        $skip = $request->input('skip', 0);
+        $take = 4;
+
+        $search = $request->input('search', '');
+        $categoryId = $request->input('category', null);
+
+        $query = Course::query()
+            ->whereHas('students', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->with('category');
+
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        $myCourses = $query->orderByDesc('id')
+            ->skip($skip)
+            ->take($take)
+            ->get()
+            ->sortByDesc(function ($course) {
+                return $course->averageRating();
+            });
+
+        return response()->json($myCourses);
+    }
+
+
+    public function loadMoreReviews(Request $request, Course $course)
+    {
+        $skip = $request->query('skip', 0);
+        $reviews = Review::where('course_id', $course->id)
+            ->orderByDesc('created_at')
+            ->skip($skip)
+            ->take(4)
+            ->get();
+        return response()->json($reviews);
     }
 
     public function details(Course $course)
     {
+        $courseImage = $course->course_images()->orderByDesc('id')->get();
+        $faqsAndReviews = $this->getFaqsAndReviews();
+        $reviews = Review::where('course_id', $course->id)->orderByDesc('created_at')->take(3)->get();
+        $allReviews = Review::where('course_id', $course->id)->orderByDesc('created_at')->get();
         $notificationsData = $this->getUserNotifications();
-        
-        return view('front.details', compact('course') + $notificationsData);
+
+        return view('front.details', compact('course', 'courseImage', 'reviews', 'allReviews') + $faqsAndReviews + $notificationsData);
     }
 
-    public function category(Category $category)
+    public function category(Category $category, Request $request)
     {
-        $courses = $category->courses()->get();
+        $search = $request->input('search');
+        $query = $category->courses()->orderByDesc('id');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('slug', 'like', '%' . $search . '%');
+            });
+        }
+
+        $courses = $query->paginate(2);
+        $faqsAndReviews = $this->getFaqsAndReviews();
         $notificationsData = $this->getUserNotifications();
-        
-        return view('front.category', compact('category', 'courses') + $notificationsData);
+
+        return view('front.category', compact('category', 'courses', 'search') + $faqsAndReviews + $notificationsData);
     }
 
     public function pricing()
     {
         $user = Auth::user();
-        if ($user->hasActiveSubscription()) {
-            return redirect()->route('front.index');
+
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'You are not logged in yet');
         }
+
+        if ($user->hasActiveSubscription()) {
+            return redirect()->route('front.index')->with('error', 'You already have a subscription');
+        }
+
+        $faqsAndReviews = $this->getFaqsAndReviews();
         $notificationsData = $this->getUserNotifications();
-        
-        return view('front.pricing', $notificationsData);
+
+        return view('front.pricing', $faqsAndReviews + $notificationsData);
     }
 
     public function checkout()
     {
         $user = Auth::user();
+
         if ($user->hasActiveSubscription()) {
             return redirect()->route('front.index');
         }
+
         $notificationsData = $this->getUserNotifications();
-        
         return view('front.checkout', $notificationsData);
     }
 
     public function checkout_store(StoreSubscribeTransactionRequest $request, NotificationController $notificationController)
     {
         $user = Auth::user();
+
         if ($user->hasActiveSubscription()) {
             return redirect()->route('front.index');
         }
@@ -89,8 +272,6 @@ class FrontController extends Controller
             $validated['is_paid'] = false;
 
             $transaction = SubscribeTransaction::create($validated);
-
-            // Tambahkan notifikasi "Pembayaran diproses"
             $notificationController->createPaymentNotification($user);
         });
 
@@ -100,22 +281,46 @@ class FrontController extends Controller
     public function learning(Course $course, $courseVideoId)
     {
         $user = Auth::user();
+
         if (!$user->hasActiveSubscription()) {
             return redirect()->route('front.pricing');
         }
 
-        $video = $course->course_videos->firstWhere('id', $courseVideoId);
+        $courseImage = $course->course_images()->orderByDesc('id')->get();
+        $faqsAndReviews = $this->getFaqsAndReviews();
+        $video = $course->course_videos()->firstWhere('id', $courseVideoId);
 
         $user->courses()->syncWithoutDetaching($course->id);
-
         $notificationsData = $this->getUserNotifications();
+        $reviews = Review::where('course_id', $course->id)->orderByDesc('created_at')->get();
 
-        return view('front.learning', compact('course', 'video') + $notificationsData);
+        $allReviews = Review::where('course_id', $course->id)->orderByDesc('created_at')->get();
+        return view('front.learning', compact('course', 'video', 'courseImage', 'reviews', 'allReviews') + $faqsAndReviews + $notificationsData);
+    }
+
+    public function markVideoAsWatched($videoId)
+    {
+        $video = CourseVideo::find($videoId);
+
+        if ($video) {
+            $video->watched = true;
+            $video->save();
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 404);
     }
 
     public function checkoutDetails()
     {
-        $transactions = SubscribeTransaction::where('user_id', Auth::id())->get();
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'You are not logged in yet');
+        }
+
+        $transactions = SubscribeTransaction::where('user_id', $user->id)->get();
         $notificationsData = $this->getUserNotifications();
 
         return view('front.checkout_details', compact('transactions') + $notificationsData);
@@ -125,7 +330,17 @@ class FrontController extends Controller
     {
         $transactions = SubscribeTransaction::where('user_id', Auth::id())->latest()->first();
         $notificationsData = $this->getUserNotifications();
-        
+
         return view('front.checkout_view_details', compact('transactions') + $notificationsData);
+    }
+
+    public function exportPdf(SubscribeTransaction $transaction)
+    {
+        $data = [
+            'transactions' => $transaction,
+        ];
+
+        $pdf = PDF::loadView('front.checkout_details_pdf', $data);
+        return $pdf->download('checkout_details.pdf');
     }
 }

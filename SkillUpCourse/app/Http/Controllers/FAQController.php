@@ -11,12 +11,25 @@ use Illuminate\Support\Facades\Session;
 
 class FAQController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        
-        $faqs = FAQ::orderBy('id', 'desc')->get();
-        return view('admin.faq.index', compact('faqs'));
+        $successMessage = Session::get('success');
+        $errorMessage = Session::get('error');
+
+        $search = $request->input('search');
+        $query = FAQ::orderBy('id', 'desc');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('question', 'like', '%' . $search . '%')
+                    ->orWhere('answer', 'like', '%' . $search . '%');
+            });
+        }
+
+        $faqs = $query->paginate(4);
+        return view('admin.faqs.index', compact('faqs', 'successMessage', 'errorMessage', 'search'));
     }
+
 
     public function create()
     {
@@ -31,7 +44,7 @@ class FAQController extends Controller
 
             FAQ::create($validated);
         });
-        Session::flash('success', 'Category has been created successfully');
+        Session::flash('success', 'FAQ has been created successfully');
         return redirect()->route('admin.faqs.index');
     }
 
@@ -43,17 +56,17 @@ class FAQController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(FAQ $fAQ)
+    public function edit(FAQ $faq)
     {
-        return view('admin.faqs.edit', compact('fAQ'));
+        return view('admin.faqs.edit', compact('faq'));
     }
 
 
-    public function update(Request $request, FAQ $fAQ)
+    public function update(StoreFAQRequest $request, FAQ $faq)
     {
-        DB::transaction(function () use ($request, $fAQ) {
+        DB::transaction(function () use ($request, $faq) {
             $validated = $request->validated();
-            $fAQ->update($validated);
+            $faq->update($validated);
         });
         Session::flash('success', 'FAQ has been updated successfully');
         return redirect()->route('admin.faqs.index');
@@ -62,16 +75,16 @@ class FAQController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(FAQ $fAQ)
+    public function destroy(FAQ $faq)
     {
-        DB::transaction();
         try {
-            $fAQ->delete();
-            DB::commit();
+            DB::transaction(function () use ($faq) {
+                $faq->delete();
+            });
+
             Session::flash('success', 'FAQ has been deleted successfully');
             return redirect()->route('admin.faqs.index');
         } catch (\Throwable $th) {
-            DB::rollBack();
             Session::flash('error', $th->getMessage());
             return redirect()->route('admin.faqs.index');
         }

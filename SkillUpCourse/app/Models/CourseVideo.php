@@ -26,4 +26,9 @@ class CourseVideo extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
+    public function status()
+    {
+        return $this->hasOne(CourseVideoStatus::class);
+    }
 }

@@ -47,6 +47,32 @@ class Course extends Model
 
     public function students()
     {
-        return $this->belongsToMany(User::class, 'course_students');
+        return $this->belongsToMany(User::class, 'course_students')
+            ->withTimestamps();
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'course_id')->orderBy('id', 'DESC');
+    }
+
+    public function course_images()
+    {
+        return $this->hasMany(CourseImage::class, 'course_id')->orderBy('id', 'DESC');
+    }
+    public function averageRating()
+    {
+        $totalRating = 0;
+        $totalReviews = $this->reviews()->count();
+
+        if ($totalReviews > 0) {
+            foreach ($this->reviews as $review) {
+                $totalRating += $review->rating;
+            }
+
+            return $totalRating / $totalReviews;
+        }
+
+        return 0;
     }
 }

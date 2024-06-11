@@ -5,8 +5,27 @@
 @section('content')
     <div style="background-image: url('{{ asset('assets/background/Hero-Banner.png') }}')" id="hero-section"
         class="max-w-[1200px] mx-auto w-full h-[393px] flex flex-col gap-10 pb-[50px] bg-center bg-no-repeat bg-cover rounded-[32px] overflow-hidden absolute transform -translate-x-1/2 left-1/2">
-    @include('layouts.frontend.navbar')
+        @include('layouts.frontend.navbar')
     </div>
+
+    <div class="top-right-container">
+        @if (session('success'))
+            <div class="alert alert-success">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                <strong>Success!</strong><br> {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-error">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                <strong>Error!</strong> <br> {{ session('error') }}
+            </div>
+        @endif
+    </div>
+
+
+
     <section id="video-content" class="max-w-[1100px] w-full mx-auto mt-[130px]">
         <div class="video-player relative flex flex-nowrap gap-5">
             <div class="plyr__video-embed w-full overflow-hidden relative rounded-[20px]" id="player">
@@ -32,12 +51,12 @@
                             </p>
                         </a>
                     </div>
-                    @forelse ($course->course_videos as $video)
+                    @forelse ($course->course_videos as $index => $video)
                         @php
                             $currentVideoId = Route::current()->parameter('courseVideoId');
                             $isActive = $currentVideoId == $video->id;
                         @endphp
-                        <div
+                        <div id="video-{{ $video->id }}"
                             class="group p-[12px_16px] flex items-center gap-[10px] {{ $isActive ? 'bg-[#3525B3]' : 'bg-[#E9EFF3]' }}  rounded-full hover:bg-[#3525B3] transition-all duration-300">
                             @if ($isActive)
                                 <div class="text-white group-hover:text-white transition-all duration-300">
@@ -61,288 +80,193 @@
                             <a href="{{ route('front.learning', [$course, 'courseVideoId' => $video->id]) }}">
                                 <p
                                     class="font-semibold group-hover:text-white transition-all duration-300 {{ $isActive ? 'text-white' : 'text-black' }}">
-                                    {{ $video->name }}</p>
+                                    {{ $video->name }}
+                                    @if ($video->watched)
+                                        <span class="check-icon inline-block text-green-500 ml-2"><i
+                                                class="fas fa-check-circle"></i></span>
+                                    @endif
+                                </p>
                             </a>
                         </div>
                     @empty
+                        <p>No videos available.</p>
                     @endforelse
                 </div>
+                <div class="mt-5 text-center">
+                    <button id="nextButton" class="btn-primary">Next</button>
+                </div>
+                <form id="reviewForm" action="{{ route('admin.reviews.add', $course) }}" method="POST"
+                    style="display: none;">
+                    @csrf
+                    <input type="hidden" name="rating" id="form-rating">
+                    <input type="hidden" name="note" id="form-note">
+                    <input type="hidden" name="course_id" value="{{ $course->id }}">
+                    <input type="hidden" name="user_id" value="{{ Auth::id() }}">
+                    <input type="hidden" name="courseVideoId" value="{{ $currentVideoId }}">
+                </form>
             </div>
         </div>
     </section>
-    <section id="Video-Resources" class="flex flex-col mt-5">
-        <div class="max-w-[1100px] w-full mx-auto flex flex-col gap-3">
-            <h1 class="title font-extrabold text-[30px] leading-[45px]">{{ $course->name }}</h1>
-            <div class="flex items-center gap-5">
-                <div class="flex items-center gap-[6px]">
-                    <div>
-                        <img src="{{ asset('assets/icon/crown.svg') }}" alt="icon">
-                    </div>
-                    <p class="font-semibold">{{ $course->category->name }}</p>
-                </div>
-                <div class="flex items-center gap-[6px]">
-                    <div>
-                        <img src="{{ asset('assets/icon/award-outline.svg') }}" alt="icon">
-                    </div>
-                    <p class="font-semibold">Certificate</p>
-                </div>
-                <div class="flex items-center gap-[6px]">
-                    <div>
-                        <img src="{{ asset('assets/icon/profile-2user.svg') }}" alt="icon">
-                    </div>
-                    <p class="font-semibold">{{ $course->students->count() }} students</p>
-                </div>
-                <div class="flex items-center gap-[6px]">
-                    <div>
-                        <img src="{{ asset('assets/icon/brifecase-tick.svg') }}" alt="icon">
-                    </div>
-                    <p class="font-semibold">Job-Guarantee</p>
-                </div>
-            </div>
-        </div>
-        <div
-            class="max-w-[1100px] w-full mx-auto mt-10 tablink-container flex gap-3 px-4 sm:p-0 no-scrollbar overflow-x-scroll">
-            <div class="tablink font-semibold text-lg h-[47px] transition-all duration-300 cursor-pointer hover:text-[#FF6129]"
-                onclick="openPage('About', this)" id="defaultOpen">About</div>
-            <div class="tablink font-semibold text-lg h-[47px] transition-all duration-300 cursor-pointer hover:text-[#FF6129]"
-                onclick="openPage('Resources', this)">Resources</div>
-            <div class="tablink font-semibold text-lg h-[47px] transition-all duration-300 cursor-pointer hover:text-[#FF6129]"
-                onclick="openPage('Reviews', this)">Reviews</div>
-            <div class="tablink font-semibold text-lg h-[47px] transition-all duration-300 cursor-pointer hover:text-[#FF6129]"
-                onclick="openPage('Discussions', this)">Discussions</div>
-            <div class="tablink font-semibold text-lg h-[47px] transition-all duration-300 cursor-pointer hover:text-[#FF6129]"
-                onclick="openPage('Rewards', this)">Rewards</div>
-        </div>
-        <div class="bg-[#F5F8FA] py-[50px]">
-            <div class="max-w-[1100px] w-full mx-auto flex flex-col gap-[70px]">
-                <div class="flex gap-[50px]">
-                    <div class="tabs-container w-[700px] flex shrink-0">
-                        <div id="About" class="tabcontent hidden">
-                            <div class="flex flex-col gap-5 w-[700px] shrink-0">
-                                <h3 class="font-bold text-2xl">Grow Your Career</h3>
-                                <p class="font-medium leading-[30px]">
-                                    {{ $course->about }}
-                                </p>
-
-                                <div class="grid grid-cols-2 gap-x-[30px] gap-y-5">
-                                    @forelse ($course->course_keypoints as $keypoint)
-                                        <div class="benefit-card flex items-center gap-3">
-                                            <div class="w-6 h-6 flex shrink-0">
-                                                <img src="{{ asset('assets/icon/tick-circle.svg') }}" alt="icon">
-                                            </div>
-                                            <p class="font-medium leading-[30px]">{{ $keypoint->name }}</p>
-                                        </div>
-                                    @empty
-                                    @endforelse
-                                </div>
-                            </div>
-                        </div>
-                        <div id="Resources" class="tabcontent hidden">
-                            <div class="flex flex-col gap-5 w-[700px] shrink-0">
-                                <h3 class="font-bold text-2xl">Resources</h3>
-                                <p class="font-medium leading-[30px]">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Nesciunt eos et accusantium
-                                    quia exercitationem reiciendis? Doloribus, voluptate natus voluptas deserunt aliquam
-                                    nesciunt blanditiis ipsum porro hic! Iusto maxime ullam soluta.
-                                </p>
-                            </div>
-                        </div>
-                        <div id="Reviews" class="tabcontent hidden">
-                            <div class="flex flex-col gap-5 w-[700px] shrink-0">
-                                <h3 class="font-bold text-2xl">Reviews</h3>
-                                <p class="font-medium leading-[30px]">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Nesciunt eos et accusantium
-                                    quia exercitationem reiciendis? Doloribus, voluptate natus voluptas deserunt aliquam
-                                    nesciunt blanditiis ipsum porro hic! Iusto maxime ullam soluta.
-                                </p>
-                            </div>
-                        </div>
-                        <div id="Discussions" class="tabcontent hidden">
-                            <div class="flex flex-col gap-5 w-[700px] shrink-0">
-                                <h3 class="font-bold text-2xl">Discussions</h3>
-                                <p class="font-medium leading-[30px]">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Nesciunt eos et accusantium
-                                    quia exercitationem reiciendis? Doloribus, voluptate natus voluptas deserunt aliquam
-                                    nesciunt blanditiis ipsum porro hic! Iusto maxime ullam soluta.
-                                </p>
-                            </div>
-                        </div>
-                        <div id="Rewards" class="tabcontent hidden">
-                            <div class="flex flex-col gap-5 w-[700px] shrink-0">
-                                <h3 class="font-bold text-2xl">Rewards</h3>
-                                <p class="font-medium leading-[30px]">
-                                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Nesciunt eos et accusantium
-                                    quia exercitationem reiciendis? Doloribus, voluptate natus voluptas deserunt aliquam
-                                    nesciunt blanditiis ipsum porro hic! Iusto maxime ullam soluta.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mentor-sidebar flex flex-col gap-[30px] w-full">
-                        <div class="mentor-info bg-white flex flex-col gap-4 rounded-2xl p-5">
-                            <p class="font-bold text-lg text-left w-full">Teacher</p>
-                            <div class="flex items-center justify-between w-full">
-                                <div class="flex items-center gap-3">
-                                    <a href=""
-                                        class="w-[50px] h-[50px] flex shrink-0 rounded-full overflow-hidden">
-                                        <img src="{{ Storage::url($course->teacher->user->avatar) }}"
-                                            class="w-full h-full object-cover" alt="photo">
-                                    </a>
-                                    <div class="flex flex-col gap-[2px]">
-                                        <a href="" class="font-semibold">{{ $course->teacher->user->name }}</a>
-                                        <p class="text-sm text-[#6D7786]">{{ $course->teacher->user->occupation }}</p>
-                                    </div>
-                                </div>
-                                <a href=""
-                                    class="p-[4px_12px] rounded-full bg-[#FF6129] font-semibold text-xs text-white text-center">Follow</a>
-                            </div>
-                        </div>
-                        <div class="bg-white flex flex-col gap-5 rounded-2xl p-5">
-                            <p class="font-bold text-lg text-left w-full">Unlock Badges</p>
-
-                            <div class="flex items-center gap-3">
-                                <div class="w-[50px] h-[50px] flex shrink-0 rounded-full overflow-hidden">
-                                    <img src="{{ asset('assets/icon/Group 7.svg') }}" class="w-full h-full object-cover"
-                                        alt="icon">
-                                </div>
-                                <div class="flex flex-col gap-[2px]">
-                                    <div class="font-semibold">Spirit of Learning</div>
-                                    <p class="text-sm text-[#6D7786]">18,393 earned</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="w-[50px] h-[50px] flex shrink-0 rounded-full overflow-hidden">
-                                    <img src="{{ asset('assets/icon/Group 7-1.svg') }}"
-                                        class="w-full h-full object-cover" alt="icon">
-                                </div>
-                                <div class="flex flex-col gap-[2px]">
-                                    <div class="font-semibold">Everyday New</div>
-                                    <p class="text-sm text-[#6D7786]">6,392 earned</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="w-[50px] h-[50px] flex shrink-0 rounded-full overflow-hidden">
-                                    <img src="{{ asset('assets/icon/Group 7-2.svg') }}"
-                                        class="w-full h-full object-cover" alt="icon">
-                                </div>
-                                <div class="flex flex-col gap-[2px]">
-                                    <div class="font-semibold">Quick Learner Pro</div>
-                                    <p class="text-sm text-[#6D7786]">44 earned</p>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-                <div id="Screenshots" class="flex flex-col gap-3">
-                    <h3 class="title-section font-bold text-xl leading-[30px] ">Students Portfolio</h3>
-                    <div class="grid grid-cols-4 gap-5">
-                        <div class="rounded-[20px] overflow-hidden w-full h-[200px] hover:shadow-[0_10px_20px_0_#0D051D20] transition-all duration-300"
-                            data-src="{{ asset('assets/thumbnail/image.png') }}" data-fancybox="gallery"
-                            data-caption="Caption #1">
-                            <img src="{{ asset('assets/thumbnail/image.png') }}" class="object-cover h-full w-full"
-                                alt="image">
-                        </div>
-                        <div class="rounded-[20px] overflow-hidden w-full h-[200px] hover:shadow-[0_10px_20px_0_#0D051D20] transition-all duration-300"
-                            data-src="{{ asset('assets/thumbnail/image-1.png') }}" data-fancybox="gallery"
-                            data-caption="Caption #1">
-                            <img src="{{ asset('assets/thumbnail/image-1.png') }}" class="object-cover h-full w-full"
-                                alt="image">
-                        </div>
-                        <div class="rounded-[20px] overflow-hidden w-full h-[200px] hover:shadow-[0_10px_20px_0_#0D051D20] transition-all duration-300"
-                            data-src="{{ asset('assets/thumbnail/image-2.png') }}" data-fancybox="gallery"
-                            data-caption="Caption #1">
-                            <img src="{{ asset('assets/thumbnail/image-2.png') }}" class="object-cover h-full w-full"
-                                alt="image">
-                        </div>
-                        <div class="rounded-[20px] overflow-hidden w-full h-[200px] hover:shadow-[0_10px_20px_0_#0D051D20] transition-all duration-300"
-                            data-src="{{ asset('assets/thumbnail/image-3.png') }}" data-fancybox="gallery"
-                            data-caption="Caption #1">
-                            <img src="{{ asset('assets/thumbnail/image-3.png') }}" class="object-cover h-full w-full"
-                                alt="image">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section id="FAQ" class="max-w-[1200px] mx-auto flex flex-col py-[70px] px-[100px]">
-        <div class="flex justify-between items-center">
-            <div class="flex flex-col gap-[30px]">
-                <div
-                    class="gradient-badge w-fit p-[8px_16px] rounded-full border border-[#FED6AD] flex items-center gap-[6px]">
-                    <div>
-                        <img src="{{ asset('assets/icon/medal-star.svg') }}" alt="icon">
-                    </div>
-                    <p class="font-medium text-sm text-[#FF6129]">Grow Your Career</p>
-                </div>
-                <div class="flex flex-col">
-                    <h2 class="font-bold text-[36px] leading-[52px]">Get Your Answers</h2>
-                    <p class="text-lg text-[#475466]">It’s time to upgrade skills without limits!</p>
-                </div>
-                <a href=""
-                    class="text-white font-semibold rounded-[30px] p-[16px_32px] bg-[#FF6129] transition-all duration-300 hover:shadow-[0_10px_20px_0_#FF612980] w-fit">Contact
-                    Our Sales</a>
-            </div>
-            <div class="flex flex-col gap-[30px] w-[552px] shrink-0">
-                <div
-                    class="flex flex-col p-5 rounded-2xl bg-[#FFF8F4] has-[.hide]:bg-transparent border-t-4 border-[#FF6129] has-[.hide]:border-0 w-full">
-                    <button class="accordion-button flex justify-between gap-1 items-center"
-                        data-accordion="accordion-faq-1">
-                        <span class="font-semibold text-lg text-left">Can beginner join the course?</span>
-                        <div class="arrow w-9 h-9 flex shrink-0">
-                            <img src="{{ asset('assets/icon/add.svg') }}" alt="icon">
-                        </div>
-                    </button>
-                    <div id="accordion-faq-1" class="accordion-content hide">
-                        <p class="leading-[30px] text-[#475466] pt-[10px]">Yes, we have provided a variety range of
-                            course from beginner to intermediate level to prepare your next big career,</p>
-                    </div>
-                </div>
-                <div
-                    class="flex flex-col p-5 rounded-2xl bg-[#FFF8F4] has-[.hide]:bg-transparent border-t-4 border-[#FF6129] has-[.hide]:border-0 w-full">
-                    <button class="accordion-button flex justify-between gap-1 items-center"
-                        data-accordion="accordion-faq-2">
-                        <span class="font-semibold text-lg text-left">How long does the implementation take?</span>
-                        <div class="arrow w-9 h-9 flex shrink-0">
-                            <img src="{{ asset('assets/icon/add.svg') }}" alt="icon">
-                        </div>
-                    </button>
-                    <div id="accordion-faq-2" class="accordion-content hide">
-                        <p class="leading-[30px] text-[#475466] pt-[10px]">Lorem ipsum dolor, sit amet consectetur
-                            adipisicing elit. Dolore placeat ut nostrum aperiam mollitia tempora aliquam perferendis
-                            explicabo eligendi commodi.</p>
-                    </div>
-                </div>
-                <div
-                    class="flex flex-col p-5 rounded-2xl bg-[#FFF8F4] has-[.hide]:bg-transparent border-t-4 border-[#FF6129] has-[.hide]:border-0 w-full">
-                    <button class="accordion-button flex justify-between gap-1 items-center"
-                        data-accordion="accordion-faq-3">
-                        <span class="font-semibold text-lg text-left">Do you provide the job-guarantee program?</span>
-                        <div class="arrow w-9 h-9 flex shrink-0">
-                            <img src="{{ asset('assets/icon/add.svg') }}" alt="icon">
-                        </div>
-                    </button>
-                    <div id="accordion-faq-3" class="accordion-content hide">
-                        <p class="leading-[30px] text-[#475466] pt-[10px]">Lorem ipsum dolor sit amet consectetur
-                            adipisicing elit. Molestiae itaque facere ipsum animi sunt iure!</p>
-                    </div>
-                </div>
-                <div
-                    class="flex flex-col p-5 rounded-2xl bg-[#FFF8F4] has-[.hide]:bg-transparent border-t-4 border-[#FF6129] has-[.hide]:border-0 w-full">
-                    <button class="accordion-button flex justify-between gap-1 items-center"
-                        data-accordion="accordion-faq-4">
-                        <span class="font-semibold text-lg text-left">How to issue all course certificates?</span>
-                        <div class="arrow w-9 h-9 flex shrink-0">
-                            <img src="{{ asset('assets/icon/add.svg') }}" alt="icon">
-                        </div>
-                    </button>
-                    <div id="accordion-faq-4" class="accordion-content hide">
-                        <p class="leading-[30px] text-[#475466] pt-[10px]">Lorem ipsum dolor sit amet consectetur
-                            adipisicing elit. Molestiae itaque facere ipsum animi sunt iure!</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @include('layouts.frontend.course_resources_section')
+    @include('layouts.frontend.faq-section')
 @endsection
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const nextButton = document.getElementById('nextButton');
+
+        nextButton.addEventListener('click', function() {
+            const currentVideoId = '{{ $currentVideoId }}';
+            markWatched(currentVideoId);
+        });
+
+        function markWatched(currentVideoId) {
+            fetch(`/course-videos/${currentVideoId}/watched`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const currentElement = document.querySelector(`#video-${currentVideoId}`);
+                        const checkIcon = currentElement.querySelector('.check-icon');
+                        if (checkIcon) {
+                            checkIcon.classList.remove('hidden');
+                        }
+
+                        const nextElement = currentElement.nextElementSibling;
+                        if (nextElement) {
+                            const nextVideoId = nextElement.id.split('-')[1];
+                            const nextVideoUrl =
+                                `{{ route('front.learning', [$course, 'courseVideoId' => ':videoId']) }}`
+                                .replace(':videoId', nextVideoId);
+                            window.location.href = nextVideoUrl;
+                        } else {
+                            nextButton.textContent = 'Finish';
+                            nextButton.addEventListener('click', function() {
+                                showRatingModal();
+                            });
+                        }
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to mark video as watched',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }
+                });
+        }
+
+        function showRatingModal() {
+            Swal.fire({
+                title: 'Rate this course',
+                html: `
+                    <div class="flex justify-center">
+                        <div id="star-rating" class="flex space-x-2">
+                            <span class="star" data-value="1">&#9733;</span>
+                            <span class="star" data-value="2">&#9733;</span>
+                            <span class="star" data-value="3">&#9733;</span>
+                            <span class="star" data-value="4">&#9733;</span>
+                            <span class="star" data-value="5">&#9733;</span>
+                        </div>
+                    </div>
+                    <textarea id="rating-note" class="swal2-textarea" style="width: 80%; height: 150px;" placeholder="Add a note (optional)" rows="3"></textarea>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Submit',
+                cancelButtonText: 'Cancel',
+                preConfirm: () => {
+                    const stars = document.querySelectorAll('.star.selected').length;
+                    const note = document.getElementById('rating-note').value;
+                    document.getElementById('form-rating').value = stars;
+                    document.getElementById('form-note').value = note;
+                    return {
+                        stars,
+                        note
+                    };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('reviewForm').submit();
+                }
+            });
+
+            const stars = document.querySelectorAll('.star');
+            stars.forEach(star => {
+                star.addEventListener('mouseover', () => {
+                    highlightStars(star.dataset.value);
+                });
+                star.addEventListener('mouseout', resetStars);
+                star.addEventListener('click', () => {
+                    selectStars(star.dataset.value);
+                });
+            });
+
+            function highlightStars(count) {
+                stars.forEach((star, index) => {
+                    star.classList.toggle('highlight', index < count);
+                });
+            }
+
+            function resetStars() {
+                stars.forEach(star => {
+                    star.classList.remove('highlight');
+                });
+            }
+
+            function selectStars(count) {
+                stars.forEach((star, index) => {
+                    star.classList.toggle('selected', index < count);
+                });
+            }
+        }
+    });
+</script>
+<style>
+    .top-right-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .alert {
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        display: inline-block;
+        width: 300px;
+        position: relative;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .closebtn {
+        color: #721c24;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .closebtn:hover {
+        color: #000;
+    }
+</style>

@@ -9,6 +9,8 @@ use App\Models\SubscribeTransaction;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Exports\DashboardExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DashboardController extends Controller
 {
@@ -37,5 +39,10 @@ class DashboardController extends Controller
         $categories = Category::count();
 
         return view('dashboard', compact('courses', 'students', 'transactions', 'teachers', 'categories'));
+    }
+
+    public function export()
+    {
+        return Excel::download(new DashboardExport, 'dashboard.xlsx');
     }
 }

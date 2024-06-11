@@ -13,10 +13,10 @@ class SubscribeTransaction extends Model
     protected $fillable = [
         'total_amount',
         'is_paid',
-        'user_id',
         'proof',
         'subscription_start_date',
         'subscription_end_date',
+        'user_id'
     ];
 
     protected $casts = [

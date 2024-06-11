@@ -11,7 +11,6 @@
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-10 flex flex-col gap-y-5">
                 @role('owner')
-                
                     <div class="item-card flex flex-col gap-y-10 md:flex-row justify-between items-center">
                         <div class="flex flex-col gap-y-3">
                             <svg width="46" height="46" viewBox="0 0 24 24" fill="none"
@@ -124,6 +123,14 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Tambahkan elemen canvas untuk menampilkan grafik -->
+                    <canvas id="ownerLineChart" width="300" height="40"></canvas>
+                    <canvas id="ownerBarChart" width="300" height="40"></canvas>
+                    <!-- Tambahkan tombol export -->
+                    <a href="{{ route('dashboard.export') }}"
+                        class="w-fit font-bold py-4 px-6 bg-indigo-700 text-white rounded-full mt-4">
+                        Export to Excel
+                    </a>
                 @endrole
                 @role('teacher')
                     <div class="item-card flex flex-col gap-y-10 md:flex-row justify-between items-center">
@@ -172,18 +179,189 @@
                             Create New Course
                         </a>
                     </div>
+                    <!-- Tambahkan elemen canvas untuk menampilkan grafik -->
+                    <canvas id="teacherLineChart" width="300" height="40"></canvas>
+                    <canvas id="teacherBarChart" width="300" height="40"></canvas>
+
+                    <!-- Tambahkan tombol export -->
+                    <a href="{{ route('dashboard.export') }}"
+                        class="w-fit font-bold py-4 px-6 bg-indigo-700 text-white rounded-full mt-4">
+                        Export to Excel
+                    </a>
                 @endrole
                 @role('student')
                     <h3 class="text-indigo-950 font-bold text-2xl">Upgrade Skills Today</h3>
                     <p class="text-slate-500 text-base">
-                        Grow your career with experienced teachers in Alqowy Class.
+                        Grow your career with experienced teachers in SkillUp Class.
                     </p>
                     <a href="{{ route('front.index') }}"
                         class="w-fit font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
                         Explore Catalog
                     </a>
                 @endrole
+
             </div>
         </div>
     </div>
+    <script src="{{ asset('js/chart.min.js') }}"></script>
 </x-app-layout>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    @role('owner')
+        // Data dan konfigurasi untuk diagram garis (owner)
+        var ctxOwnerLine = document.getElementById('ownerLineChart').getContext('2d');
+        var ownerLineChart = new Chart(ctxOwnerLine, {
+            type: 'line',
+            data: {
+                labels: ['Courses', 'Students', 'Transactions'], // Label sumbu x
+                datasets: [{
+                    data: [{{ $courses }}, {{ $students }},
+                        {{ $transactions }}
+                    ], // Data jumlah kursus, siswa, dan transaksi
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1,
+                    label: false // Menghilangkan label dari dataset
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                return Number.isInteger(value) ? value : null;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Menghilangkan legend
+                    }
+                }
+            }
+        });
+
+        // Data dan konfigurasi untuk diagram batang (owner)
+        var ctxOwnerBar = document.getElementById('ownerBarChart').getContext('2d');
+        var ownerBarChart = new Chart(ctxOwnerBar, {
+            type: 'bar',
+            data: {
+                labels: ['Courses', 'Students', 'Transactions'], // Label sumbu x
+                datasets: [{
+                    data: [{{ $courses }}, {{ $students }},
+                        {{ $transactions }}
+                    ], // Data jumlah kursus, siswa, dan transaksi
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1,
+                    label: false // Menghilangkan label dari dataset
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                return Number.isInteger(value) ? value : null;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Menghilangkan legend
+                    }
+                }
+            }
+        });
+    @endrole
+
+    @role('teacher')
+        // Data dan konfigurasi untuk diagram garis (teacher)
+        var ctxTeacherLine = document.getElementById('teacherLineChart').getContext('2d');
+        var teacherLineChart = new Chart(ctxTeacherLine, {
+            type: 'line',
+            data: {
+                labels: ['Courses', 'Students'], // Label sumbu x
+                datasets: [{
+                    data: [{{ $courses }}, {{ $students }}], // Data jumlah kursus dan siswa
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1,
+                    label: false // Menghilangkan label dari dataset
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                return Number.isInteger(value) ? value : null;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Menghilangkan legend
+                    }
+                }
+            }
+        });
+
+        // Data dan konfigurasi untuk diagram batang (teacher)
+        var ctxTeacherBar = document.getElementById('teacherBarChart').getContext('2d');
+        var teacherBarChart = new Chart(ctxTeacherBar, {
+            type: 'bar',
+            data: {
+                labels: ['Courses', 'Students'], // Label sumbu x
+                datasets: [{
+                    data: [{{ $courses }}, {{ $students }}], // Data jumlah kursus dan siswa
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1,
+                    label: false // Menghilangkan label dari dataset
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                return Number.isInteger(value) ? value : null;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Menghilangkan legend
+                    }
+                }
+            }
+        });
+    @endrole
+</script>

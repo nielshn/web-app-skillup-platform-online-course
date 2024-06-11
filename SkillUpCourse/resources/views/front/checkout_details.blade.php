@@ -41,15 +41,14 @@
                         <div class="flex-col">
                             <p class="text-slate-500 text-sm">Status</p>
                             @if ($transaction->is_paid)
-                                <span
-                                    class="text-sm font-bold py-2 px-3 rounded-full bg-green-500 text-black">ACTIVE</span>
+                                <span class="status-active text-white">ACTIVE</span>
                             @else
-                                <span
-                                    class="text-sm font-bold py-2 px-3 rounded-full bg-orange-500 text-black">PENDING</span>
+                                <span class="status-pending text-white">PENDING</span>
                             @endif
                         </div>
                         <div class="flex-row items-center gap-x-3">
-                            <a href="{{ route('front.checkout_view_details', $transaction) }}" class="font-bold py-4 px-6 bg-indigo-700 text-black rounded-full">
+                            <a href="{{ route('front.checkout_view_details', $transaction) }}"
+                                class="py-4 px-6 view-details-btn">
                                 View Details
                             </a>
                         </div>
@@ -61,3 +60,52 @@
         </div>
     </section>
 @endsection
+<style>
+    .item-card {
+        background-color: #F3F4F6;
+        /* Warna latar belakang item card */
+        padding: 20px;
+        /* Padding untuk ruang di sekitar isi item card */
+        border-radius: 20px;
+        /* Sudut melingkar yang diperbarui untuk item card */
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        /* Shadow untuk efek angkat */
+    }
+
+    .status-active {
+        background-color: #34D399;
+        /* Warna latar belakang untuk status ACTIVE */
+        color: #000000;
+        /* Warna teks untuk status ACTIVE */
+        padding: 4px 8px;
+        /* Padding untuk ruang di dalam status */
+        border-radius: 20px;
+        /* Sudut melingkar yang diperbarui untuk status */
+    }
+
+    .status-pending {
+        background-color: #FBBF24;
+        /* Warna latar belakang untuk status PENDING */
+        color: #000000;
+        /* Warna teks untuk status PENDING */
+        padding: 4px 8px;
+        /* Padding untuk ruang di dalam status */
+        border-radius: 20px;
+        /* Sudut melingkar yang diperbarui untuk status */
+    }
+
+    .view-details-btn {
+        background-color: #3525B3;
+        /* Warna latar belakang untuk tombol View Details */
+        color: #FFFFFF;
+        /* Warna teks untuk tombol View Details */
+        padding: 16px 24px;
+        /* Padding tombol */
+        border-radius: 30px;
+        /* Sudut melingkar untuk tombol */
+        text-decoration: none;
+        /* Menghapus dekorasi teks */
+        transition: background-color 0.3s ease;
+        /* Transisi untuk animasi */
+    }
+</style>

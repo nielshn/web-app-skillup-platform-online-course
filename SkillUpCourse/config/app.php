@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'SkillUp'),
 
     /*
     |--------------------------------------------------------------------------
@@ -38,6 +38,8 @@ return [
     | application. If disabled, a simple generic error page is shown.
     |
     */
+    // 'Charts' => ConsoleTVs\Charts\Facades\Charts::class,
+
 
     'debug' => (bool) env('APP_DEBUG', false),
 
@@ -51,6 +53,7 @@ return [
     | the application so that it's available within Artisan commands.
     |
     */
+
 
     'url' => env('APP_URL', 'http://localhost'),
 

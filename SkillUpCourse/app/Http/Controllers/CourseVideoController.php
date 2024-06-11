@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCourseVideoRequest;
 use App\Models\Course;
 use App\Models\CourseVideo;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
@@ -20,13 +22,20 @@ class CourseVideoController extends Controller
     }
 
 
-    public function create(Course $course)
+    public function create(Course $course, CourseVideo $courseVideo)
     {
-        return view('admin.course_videos.create', compact('course'));
+        return view('admin.course_videos.create', compact('course', 'courseVideo'));
     }
 
     public function store(StoreCourseVideoRequest $request, Course $course)
     {
+        $teacher = Teacher::where(['user_id' => Auth::user()->id])->first();
+
+        if (!$teacher) {
+            Session::flash('error', 'Only Teachers can manage Video Course');
+            return redirect()->route('admin.courses.index');
+        }
+
         DB::transaction(function () use ($request, $course) {
             $validated = $request->validated();
 
@@ -47,6 +56,13 @@ class CourseVideoController extends Controller
 
     public function update(StoreCourseVideoRequest $request, CourseVideo $courseVideo)
     {
+        $teacher = Teacher::where(['user_id' => Auth::user()->id])->first();
+
+        if (!$teacher) {
+            Session::flash('error', 'Only Teachers can manage Video Course');
+            return redirect()->route('admin.courses.index');
+        }
+
         DB::transaction(function () use ($request, $courseVideo) {
 
             $validated = $request->validated();
@@ -60,6 +76,13 @@ class CourseVideoController extends Controller
 
     public function destroy(CourseVideo $courseVideo)
     {
+        $teacher = Teacher::where(['user_id' => Auth::user()->id])->first();
+
+        if (!$teacher) {
+            Session::flash('error', 'Only Teachers can manage Video Course');
+            return redirect()->route('admin.courses.index');
+        }
+
         DB::beginTransaction();
         try {
             $courseVideo->delete();

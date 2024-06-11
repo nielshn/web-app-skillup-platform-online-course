@@ -22,7 +22,7 @@
                     your skills and build outstanding portfolio to tackle job interviews</p>
             </div>
             <div class="flex gap-6 w-fit">
-                <a href=""
+                <a href="{{ route('front.all_courses') }}"
                     class="text-white font-semibold rounded-[30px] p-[16px_32px] bg-[#FF6129] transition-all duration-300 hover:shadow-[0_10px_20px_0_#FF612980]">Explore
                     Courses</a>
                 <a href=""
@@ -55,7 +55,7 @@
                 <div>
                     <img src="{{ asset('assets/icon/medal-star.svg') }}" alt="icon">
                 </div>
-                <p class="font-medium text-sm text-[#FF6129]">Top Categories</p>
+                <p class="font-medium text-sm text-[#FF6129]">All Categories</p>
             </div>
             <div class="flex flex-col">
                 <h2 class="font-bold text-[40px] leading-[60px]">Browse Courses</h2>
@@ -63,17 +63,71 @@
                     this year</p>
             </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[30px]">
-            @foreach ($categories as $category)
-                <a href="{{ route('front.category', $category->slug) }}"
-                    class="card flex flex-col items-center p-4 gap-3 ring-1 ring-[#DADEE4] rounded-2xl hover:ring-2 hover:ring-[#FF6129] transition-all duration-300">
-                    <div class="w-[70px] h-[70px] flex shrink-0">
-                        <img src="assets/icon/Web Development 1.svg" class="object-contain" alt="icon">
-                    </div>
-                    <p class="font-bold text-lg text-center text-black">{{ $category->name }}</p>
-                </a>
-            @endforeach
+        <div class="group/slider flex flex-nowrap w-max items-center">
+            <div
+                class="testi-container animate-[slideToL_50s_linear_infinite] group-hover/slider:pause-animate flex gap-6 pl-6 items-center flex-nowrap">
+                @foreach ($categories as $category)
+                    <a href="{{ route('front.category', $category->slug) }}"
+                        class="category-card flex flex-col items-center p-4 gap-2 ring-1 ring-[#DADEE4] rounded-2xl hover:ring-2 hover:ring-[#FF6129] transition-all duration-300">
+                        <div
+                            class="w-[70px] h-[70px] flex-shrink-0 flex items-center justify-center bg-gray-200 rounded-full">
+                            <img src="{{ Storage::url($category->icon) }}" class="object-contain" alt="icon">
+                        </div>
+                        <p
+                            class="font-bold text-lg text-center text-black max-w-[70px] overflow-hidden overflow-ellipsis whitespace-nowrap">
+                            {{ $category->name }}</p>
+                    </a>
+                @endforeach
+            </div>
+            <div
+                class="logo-container animate-[slideToL_50s_linear_infinite] group-hover/slider:pause-animate flex gap-6 pl-6 items-center flex-nowrap ">
+                @foreach ($categories as $category)
+                    <a href="{{ route('front.category', $category->slug) }}"
+                        class="category-card flex flex-col items-center p-4 gap-2 ring-1 ring-[#DADEE4] rounded-2xl hover:ring-2 hover:ring-[#FF6129] transition-all duration-300">
+                        <div
+                            class="w-[70px] h-[70px] flex-shrink-0 flex items-center justify-center bg-gray-200 rounded-full">
+                            <img src="{{ Storage::url($category->icon) }}" class="object-contain" alt="icon">
+                        </div>
+                        <p
+                            class="font-bold text-lg text-center text-black max-w-[70px] overflow-hidden overflow-ellipsis whitespace-nowrap">
+                            {{ $category->name }}</p>
+                    </a>
+                @endforeach
+            </div>
         </div>
+        <div class="group/slider flex flex-nowrap w-max items-center">
+            <div
+                class="logo-container animate-[slideToR_50s_linear_infinite] group-hover/slider:pause-animate flex gap-6 pl-6 items-center flex-nowrap">
+                @foreach ($categories as $category)
+                    <a href="{{ route('front.category', $category->slug) }}"
+                        class="category-card flex flex-col items-center p-4 gap-2 ring-1 ring-[#DADEE4] rounded-2xl hover:ring-2 hover:ring-[#FF6129] transition-all duration-300">
+                        <div
+                            class="w-[70px] h-[70px] flex-shrink-0 flex items-center justify-center bg-gray-200 rounded-full">
+                            <img src="{{ Storage::url($category->icon) }}" class="object-contain" alt="icon">
+                        </div>
+                        <p
+                            class="font-bold text-lg text-center text-black max-w-[70px] overflow-hidden overflow-ellipsis whitespace-nowrap">
+                            {{ $category->name }}</p>
+                    </a>
+                @endforeach
+            </div>
+            <div
+                class="logo-container animate-[slideToR_50s_linear_infinite] group-hover/slider:pause-animate flex gap-6 pl-6 items-center flex-nowrap ">
+                @foreach ($categories as $category)
+                    <a href="{{ route('front.category', $category->slug) }}"
+                        class="category-card flex flex-col items-center p-4 gap-2 ring-1 ring-[#DADEE4] rounded-2xl hover:ring-2 hover:ring-[#FF6129] transition-all duration-300">
+                        <div
+                            class="w-[70px] h-[70px] flex-shrink-0 flex items-center justify-center bg-gray-200 rounded-full">
+                            <img src="{{ Storage::url($category->icon) }}" class="object-contain" alt="icon">
+                        </div>
+                        <p
+                            class="font-bold text-lg text-center text-black max-w-[70px] overflow-hidden overflow-ellipsis whitespace-nowrap">
+                            {{ $category->name }}</p>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
     </section>
 
     <section id="Popular-Courses"
@@ -113,33 +167,61 @@
                                     class="font-semibold text-lg line-clamp-2 hover:line-clamp-none min-h-[56px]">{{ $course->name }}</a>
                                 <div class="flex justify-between items-center">
                                     <div class="flex items-center gap-[2px]">
-                                        <div>
-                                            <img src="{{ asset('assets/icon/star.svg') }}" alt="star">
-                                        </div>
-                                        <div>
-                                            <img src="{{ asset('assets/icon/star.svg') }}" alt="star">
-                                        </div>
-                                        <div>
-                                            <img src="{{ asset('assets/icon/star.svg') }}" alt="star">
-                                        </div>
-                                        <div>
-                                            <img src="{{ asset('assets/icon/star.svg') }}" alt="star">
-                                        </div>
-                                        <div>
-                                            <img src="{{ asset('assets/icon/star.svg') }}" alt="star">
-                                        </div>
+                                        @php
+                                            $averageRating = $course->averageRating();
+                                            $roundedRating = floor($averageRating);
+                                            $displayRating = 0;
+                                            if ($averageRating == 5) {
+                                                $displayRating = 5;
+                                            } elseif ($averageRating >= 4 && $averageRating < 5) {
+                                                $displayRating = 4;
+                                            } elseif ($averageRating >= 3 && $averageRating < 4) {
+                                                $displayRating = 3;
+                                            } elseif ($averageRating >= 2 && $averageRating < 3) {
+                                                $displayRating = 2;
+                                            } elseif ($averageRating >= 1 && $averageRating < 2) {
+                                                $displayRating = 1;
+                                            }
+                                        @endphp
+                                        @for ($i = 0; $i < 5; $i++)
+                                            @if ($i < $displayRating)
+                                                <div>
+                                                    <img src="{{ asset('assets/icon/star.svg') }}" alt="Filled Star">
+                                                </div>
+                                            @endif
+                                        @endfor
                                     </div>
                                     <p class="text-right text-[#6D7786]">{{ $course->students->count() }} students</p>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 flex shrink-0 rounded-full overflow-hidden">
-                                        <img src="{{ Storage::url($course->teacher->user->avatar) }}"
-                                            class="w-full h-full object-cover" alt="icon">
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <p class="font-semibold">{{ $course->teacher->user->name }}</p>
-                                        <p class="text-[#6D7786]">{{ $course->teacher->user->occupation }}</p>
-                                    </div>
+                                    @if ($course->teacher && $course->teacher->user)
+                                        <div class="w-8 h-8 flex shrink-0 rounded-full overflow-hidden">
+                                            <img src="{{ Storage::url($course->teacher->user->avatar) }}"
+                                                class="w-full h-full object-cover" alt="icon">
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <p class="font-semibold">{{ $course->teacher->user->name }}</p>
+                                            <p class="text-[#6D7786]">{{ $course->teacher->user->occupation }}</p>
+                                        </div>
+                                        @if ($course->students->contains(Auth::id()))
+                                            <div style="background-color: #34D399; border-radius: 9999px;"
+                                                class="w-40 h-8 flex items-center justify-center ml-auto">
+                                                <span class="check-icon inline-block text-white ml-2"><i
+                                                        class="fas fa-check-circle"></i></span>
+                                                <span class="text-black text-sm font-semibold ml-1"
+                                                    style="padding: 0 8px;">Joined</span>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="w-8 h-8 flex shrink-0 rounded-full overflow-hidden">
+                                            <img src="{{ asset('assets/icon/default-avatar.png') }}"
+                                                class="w-full h-full object-cover" alt="default icon">
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <p class="font-semibold">Unknown Teacher</p>
+                                            <p class="text-[#6D7786]">N/A</p>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -199,124 +281,6 @@
                 Pricing</a>
         </div>
     </section>
-    <section id="FAQ" class="max-w-[1200px] mx-auto flex flex-col py-[70px] px-[100px]">
-        <div class="flex justify-between items-center">
-            <div class="flex flex-col gap-[30px]">
-                <div
-                    class="gradient-badge w-fit p-[8px_16px] rounded-full border border-[#FED6AD] flex items-center gap-[6px]">
-                    <div>
-                        <img src="assets/icon/medal-star.svg" alt="icon">
-                    </div>
-                    <p class="font-medium text-sm text-[#FF6129]">Grow Your Career</p>
-                </div>
-                <div class="flex flex-col">
-                    <h2 class="font-bold text-[36px] leading-[52px]">Get Your Answers</h2>
-                    <p class="text-lg text-[#475466]">It’s time to upgrade skills without limits!</p>
-                </div>
-                <a href=""
-                    class="text-white font-semibold rounded-[30px] p-[16px_32px] bg-[#FF6129] transition-all duration-300 hover:shadow-[0_10px_20px_0_#FF612980] w-fit">Contact
-                    Our Sales</a>
-            </div>
-            <div class="flex flex-col gap-[30px] w-[552px] shrink-0">
-                <div
-                    class="flex flex-col p-5 rounded-2xl bg-[#FFF8F4] has-[.hide]:bg-transparent border-t-4 border-[#FF6129] has-[.hide]:border-0 w-full">
-                    <button class="accordion-button flex justify-between gap-1 items-center"
-                        data-accordion="accordion-faq-1">
-                        <span class="font-semibold text-lg text-left">Can beginner join the course?</span>
-                        <div class="arrow w-9 h-9 flex shrink-0">
-                            <img src="assets/icon/add.svg" alt="icon">
-                        </div>
-                    </button>
-                    <div id="accordion-faq-1" class="accordion-content hide">
-                        <p class="leading-[30px] text-[#475466] pt-[10px]">Yes, we have provided a variety range of course
-                            from beginner to intermediate level to prepare your next big career,</p>
-                    </div>
-                </div>
-                <div
-                    class="flex flex-col p-5 rounded-2xl bg-[#FFF8F4] has-[.hide]:bg-transparent border-t-4 border-[#FF6129] has-[.hide]:border-0 w-full">
-                    <button class="accordion-button flex justify-between gap-1 items-center"
-                        data-accordion="accordion-faq-2">
-                        <span class="font-semibold text-lg text-left">How long does the implementation take?</span>
-                        <div class="arrow w-9 h-9 flex shrink-0">
-                            <img src="assets/icon/add.svg" alt="icon">
-                        </div>
-                    </button>
-                    <div id="accordion-faq-2" class="accordion-content hide">
-                        <p class="leading-[30px] text-[#475466] pt-[10px]">Lorem ipsum dolor, sit amet consectetur
-                            adipisicing elit. Dolore placeat ut nostrum aperiam mollitia tempora aliquam perferendis
-                            explicabo eligendi commodi.</p>
-                    </div>
-                </div>
-                <div
-                    class="flex flex-col p-5 rounded-2xl bg-[#FFF8F4] has-[.hide]:bg-transparent border-t-4 border-[#FF6129] has-[.hide]:border-0 w-full">
-                    <button class="accordion-button flex justify-between gap-1 items-center"
-                        data-accordion="accordion-faq-3">
-                        <span class="font-semibold text-lg text-left">Do you provide the job-guarantee program?</span>
-                        <div class="arrow w-9 h-9 flex shrink-0">
-                            <img src="assets/icon/add.svg" alt="icon">
-                        </div>
-                    </button>
-                    <div id="accordion-faq-3" class="accordion-content hide">
-                        <p class="leading-[30px] text-[#475466] pt-[10px]">Lorem ipsum dolor sit amet consectetur
-                            adipisicing elit. Molestiae itaque facere ipsum animi sunt iure!</p>
-                    </div>
-                </div>
-                <div
-                    class="flex flex-col p-5 rounded-2xl bg-[#FFF8F4] has-[.hide]:bg-transparent border-t-4 border-[#FF6129] has-[.hide]:border-0 w-full">
-                    <button class="accordion-button flex justify-between gap-1 items-center"
-                        data-accordion="accordion-faq-4">
-                        <span class="font-semibold text-lg text-left">How to issue all course certificates?</span>
-                        <div class="arrow w-9 h-9 flex shrink-0">
-                            <img src="assets/icon/add.svg" alt="icon">
-                        </div>
-                    </button>
-                    <div id="accordion-faq-4" class="accordion-content hide">
-                        <p class="leading-[30px] text-[#475466] pt-[10px]">Lorem ipsum dolor sit amet consectetur
-                            adipisicing elit. Molestiae itaque facere ipsum animi sunt iure!</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @include('layouts.frontend.zero-success-section')
+    @include('layouts.frontend.faq-section')
 @endsection
-@push('style')
-    <style>
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(1, 1fr);
-            gap: 30px;
-        }
-
-        @media (min-width: 640px) {
-            .grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (min-width: 768px) {
-            .grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        .card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .thumbnail img {
-            transition: transform 0.3s;
-        }
-
-        .thumbnail:hover img {
-            transform: scale(1.1);
-        }
-    </style>
-@endpush

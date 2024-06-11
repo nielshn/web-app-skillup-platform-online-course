@@ -70,3 +70,52 @@
         </div>
     </nav>
 @endif
+
+<style>
+    .pagination nav {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .pagination a,
+    .pagination span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        margin: 0 2px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .pagination a:hover {
+        background-color: #e9ecef;
+        border-color: #ccc;
+        text-decoration: none;
+    }
+
+    .pagination .active span {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: #fff;
+    }
+
+    .pagination a svg,
+    .pagination span svg {
+        width: 16px;
+        height: 16px;
+        margin-left: 4px;
+    }
+
+    .pagination a[rel="prev"] svg,
+    .pagination span[rel="prev"] svg {
+        margin-left: 0;
+        margin-right: 4px;
+    }
+</style>

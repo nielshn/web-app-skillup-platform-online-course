@@ -10,6 +10,7 @@ use App\Models\CourseStudent;
 use App\Models\SubscribeTransaction;
 use App\Models\Notification;
 use App\Models\CourseVideo;
+use App\Models\CourseVideoStatus;
 use App\Models\FAQ;
 use App\Models\Review;
 use Illuminate\Http\Request;
@@ -278,33 +279,54 @@ class FrontController extends Controller
         return redirect()->route('dashboard');
     }
 
+
+
     public function learning(Course $course, $courseVideoId)
     {
         $user = Auth::user();
 
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'You are not logged in yet');
+        }
+
         if (!$user->hasActiveSubscription()) {
-            return redirect()->route('front.pricing');
+            return redirect()->route('front.pricing')->with('error', 'You are not subscribed to this subscription');
         }
 
         $courseImage = $course->course_images()->orderByDesc('id')->get();
-        $faqsAndReviews = $this->getFaqsAndReviews();
+        $faqs = FAQ::orderByDesc('id')->take(4)->get();
+        $allFaqs = FAQ::orderByDesc('id')->get();
+
         $video = $course->course_videos()->firstWhere('id', $courseVideoId);
-
         $user->courses()->syncWithoutDetaching($course->id);
-        $notificationsData = $this->getUserNotifications();
-        $reviews = Review::where('course_id', $course->id)->orderByDesc('created_at')->get();
 
+        $notificationsData = $this->getUserNotifications();
+
+        // Retrieve reviews for the course
+        $reviews = Review::where('course_id', $course->id)->orderByDesc('created_at')->take(4)->get();
         $allReviews = Review::where('course_id', $course->id)->orderByDesc('created_at')->get();
-        return view('front.learning', compact('course', 'video', 'courseImage', 'reviews', 'allReviews') + $faqsAndReviews + $notificationsData);
+
+        // Retrieve video statuses for the logged-in user
+        $videoStatuses = CourseVideoStatus::where('user_id', $user->id)->pluck('watched', 'course_video_id')->toArray();
+
+        return view('front.learning', compact('course', 'video', 'courseImage', 'faqs', 'allFaqs', 'reviews', 'allReviews', 'videoStatuses') + $notificationsData);
     }
+
 
     public function markVideoAsWatched($videoId)
     {
+        $user = Auth::user();
         $video = CourseVideo::find($videoId);
 
         if ($video) {
-            $video->watched = true;
-            $video->save();
+            // Cari atau buat status video berdasarkan course_video_id dan user_id
+            $status = CourseVideoStatus::firstOrCreate(
+                ['course_video_id' => $video->id, 'user_id' => $user->id],
+                ['watched' => true]
+            );
+
+            $status->watched = true;
+            $status->save();
 
             return response()->json(['success' => true]);
         }

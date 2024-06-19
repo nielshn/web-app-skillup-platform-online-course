@@ -55,6 +55,7 @@
                         @php
                             $currentVideoId = Route::current()->parameter('courseVideoId');
                             $isActive = $currentVideoId == $video->id;
+                            $watched = $videoStatuses[$video->id] ?? false;
                         @endphp
                         <div id="video-{{ $video->id }}"
                             class="group p-[12px_16px] flex items-center gap-[10px] {{ $isActive ? 'bg-[#3525B3]' : 'bg-[#E9EFF3]' }}  rounded-full hover:bg-[#3525B3] transition-all duration-300">
@@ -81,7 +82,7 @@
                                 <p
                                     class="font-semibold group-hover:text-white transition-all duration-300 {{ $isActive ? 'text-white' : 'text-black' }}">
                                     {{ $video->name }}
-                                    @if ($video->watched)
+                                    @if ($watched)
                                         <span class="check-icon inline-block text-green-500 ml-2"><i
                                                 class="fas fa-check-circle"></i></span>
                                     @endif

@@ -33,8 +33,7 @@
                     <div class="hover" style="padding: 20px;">
                         <h4>New to our website?</h4>
                         <p>
-                            There are advances being made in science and technology every day, and a good example of
-                            this is the rise of online courses, making education more accessible.
+                            There are advances being made in science and technology every day, and a good example of this is the rise of online courses, making education more accessible.
                         </p>
                         <a class="primary-btn" href="{{ route('register') }}"
                             style="background-color: #ff7c00; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none;">Create
@@ -53,8 +52,7 @@
                             :value="old('email')" required autofocus onfocus="this.placeholder = ''"
                             onblur="this.placeholder = 'Email'" style="padding: 15px; font-size: 16px; width: 120%;" />
                         @error('email')
-                            <span class="text-red-500 text-sm"
-                                style="display: block; margin-top: 5px;">{{ $message }}</span>
+                            <span class="text-red-500 text-sm" style="display: block; margin-top: 5px;">{{ $message }}</span>
                         @enderror
                     </div>
                     <div class="form-group" style="margin-bottom: 15px; width: 100%;">
@@ -63,8 +61,7 @@
                             onblur="this.placeholder = 'Password'"
                             style="padding: 15px; font-size: 16px; width: 120%;" />
                         @error('password')
-                            <span class="text-red-500 text-sm"
-                                style="display: block; margin-top: 5px;">{{ $message }}</span>
+                            <span class="text-red-500 text-sm" style="display: block; margin-top: 5px;">{{ $message }}</span>
                         @enderror
                     </div>
                     <div class="form-group"
@@ -72,6 +69,9 @@
                         <button type="submit" value="submit" class="primary-btn"
                             style="background-color: #ff7c00; color: #fff; padding: 10px 20px; border-radius: 5px; width: 50%;">Log
                             In</button>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <a href="{{ route('password.request') }}" style="text-decoration: none; color: #ff7c00;">Forgot Your Password?</a>
                     </div>
                 </form>
             </div>

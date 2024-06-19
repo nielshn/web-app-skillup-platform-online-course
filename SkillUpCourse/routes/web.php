@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseImageController;
@@ -16,8 +18,19 @@ use App\Models\CourseImage;
 use Illuminate\Support\Facades\Route;
 
 // web.php
+Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
+    ->name('password.request');
 
-Route::get('/index', [FrontController::class, 'index'])->name('front.index');
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+    ->name('password.email');
+
+Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
+    ->name('password.reset');
+
+Route::post('/reset-password', [NewPasswordController::class, 'store'])
+    ->name('password.update');
+
+Route::get('/', [FrontController::class, 'index'])->name('front.index');
 Route::get('/all-courses', [FrontController::class, 'allCourses'])->name('front.all_courses');
 Route::get('/details/{course:slug}', [FrontController::class, 'details'])->name('front.details');
 Route::get('/category/{category:slug}', [FrontController::class, 'category'])->name('front.category');

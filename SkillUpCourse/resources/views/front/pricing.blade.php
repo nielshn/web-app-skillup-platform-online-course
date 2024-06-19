@@ -1,11 +1,35 @@
 @extends('layouts.frontend.main')
+
 @section('title')
     Pricing Course Page
 @endsection
+
 @section('content')
     <div id="hero-section"
         class="max-w-[1200px] mx-auto w-full h-[536px] flex flex-col gap-10 pb-[50px] bg-[url('assets/background/Hero-Banner.png')] bg-center bg-no-repeat bg-cover rounded-[32px] overflow-hidden relative">
         @include('layouts.frontend.navbar')
+        @if (session('error'))
+            <div id="pricing-error-message" class="fixed top-5 right-5 z-50">
+                <div class="max-w-sm rounded-md overflow-hidden shadow-lg bg-yellow-400">
+                    <div class="px-4 py-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-bold text-white"> {{ __('Warning!') }}</span>
+                            <button onclick="closeMessage('pricing-error-message')" class="text-white">&times;</button>
+                        </div>
+                        <p class="text-white">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+        <script>
+            // Function to hide pricing error message after 5 seconds
+            setTimeout(function() {
+                var pricingErrorMessage = document.getElementById('pricing-error-message');
+                if (pricingErrorMessage) {
+                    pricingErrorMessage.remove();
+                }
+            }, 5000);
+        </script>
     </div>
     <section class="max-w-[1100px] w-full mx-auto absolute -translate-x-1/2 left-1/2 top-[170px]">
         <div class="flex flex-col gap-[30px] items-center">
@@ -116,4 +140,6 @@
         </div>
         @include('layouts.frontend.zero-success-section')
         @include('layouts.frontend.faq-section')
-    <footer @endsection
+    </section>
+    <footer>
+    @endsection

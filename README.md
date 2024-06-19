@@ -62,6 +62,28 @@ The SkillUp Web App is a robust online tutoring platform that enables students t
 - **Caching**: Implemented caching strategies to enhance the performance of the application.
 - **Database Optimization**: Utilized efficient database queries to improve data retrieval and management.
 
+## Technologies Used
+
+- **Laravel 11**: The primary framework used for building the application.
+- **Breeze**: For implementing authentication scaffolding.
+- **Spatie Permission**: For managing roles and permissions within the application.
+- **HTML5**: For structuring the web pages.
+- **Tailwind CSS**: For designing a responsive and attractive user interface.
+- **JavaScript**: For adding interactive elements to the web pages.
+- **MySQL**: For managing the database and storing user and course information.
+- **Composer**: For dependency management.
+- **Nginx**: As the web server to serve the application.
+- **GitHub Actions**: For setting up the CI/CD pipeline.
+
+
+## Learning Experience
+
+Building the Dev Restaurant Web App was an enriching experience that covered a wide range of web development concepts. From configuring Webpack to handling API requests, each step provided valuable insights into creating modern web applications. Implementing PWA features such as Service Workers and Web App Manifest enhanced my understanding of offline capabilities and performance optimization.
+
+The project also emphasized the importance of accessibility and responsive design, ensuring the app is usable and enjoyable for all users. Working with IndexDB for local storage and managing CRUD operations deepened my knowledge of client-side databases and data persistence.
+
+Overall, this project has equipped me with the skills and confidence to develop robust, user-friendly, and performant web applications.
+
 ## Getting Started
 
 ### Prerequisites
